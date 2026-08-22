@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+    <meta name="theme-color" content="#1e3aba" />
+    <meta name="description" content="Dividend Dash turns the long-division algorithm into a route-building game." />
+    <title>Dividend Dash | Jo⚡Go</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app" class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="../../" aria-label="Back to JoGo Learning Lab">
+          <span class="brand-jo">Jo</span><span class="brand-bolt">⚡</span><span class="brand-go">Go</span>
+          <span class="brand-game">Dividend Dash</span>
+        </a>
+        <div class="top-actions" aria-label="Game controls">
+          <button id="pauseButton" class="icon-button" type="button" aria-label="Pause game" hidden>Ⅱ</button>
+          <button id="soundButton" class="icon-button" type="button" aria-label="Mute sound">♪</button>
+          <button id="helpButton" class="icon-button" type="button" aria-label="Show how to play">?</button>
+          <button id="devButton" class="dev-button" type="button">DEV ⚙</button>
+        </div>
+      </header>
+
+      <main id="screen" class="screen" tabindex="-1"></main>
+      <div id="liveStatus" class="sr-only" aria-live="assertive"></div>
+    </div>
+
+    <dialog id="helpDialog" class="modal">
+      <form method="dialog" class="modal-card">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow">HOW TO PLAY</span>
+            <h2>Build a correct division route</h2>
+          </div>
+          <button class="icon-button modal-close" value="cancel" aria-label="Close help">×</button>
+        </div>
+        <ol class="how-list">
+          <li>Read the highlighted long-division step.</li>
+          <li>Tap a number-gate, or steer with Left/Right or A/D.</li>
+          <li>Lock the gate with the button, Enter, or Space.</li>
+          <li>Use the clue to repair the same step if the route breaks.</li>
+        </ol>
+        <p class="modal-note">Accuracy comes first. The gate waits at the decision line if you need more thinking time.</p>
+      </form>
+    </dialog>
+
+    <dialog id="devDialog" class="modal dev-dialog">
+      <form method="dialog" class="modal-card">
+        <div class="modal-head">
+          <div>
+            <span class="eyebrow dev-label">DEVELOPER NAVIGATION</span>
+            <h2>DEV MODE</h2>
+          </div>
+          <button class="icon-button modal-close" value="cancel" aria-label="Close developer panel">×</button>
+        </div>
+        <p>Jump directly to representative states. DEV sessions never save learner progress.</p>
+        <div id="devActions" class="dev-actions"></div>
+      </form>
+    </dialog>
+
+    <script type="module" src="src/app.js"></script>
+  </body>
+</html>

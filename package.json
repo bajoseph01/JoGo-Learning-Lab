@@ -9,7 +9,10 @@
     "preview": "vite preview",
     "test": "node --test",
     "check:registry": "node scripts/check-registry.mjs",
-    "check:links": "node scripts/check-links.mjs"
+    "check:links": "node scripts/check-links.mjs",
+    "visual-check": "node \"C:/Users/bajos/.codex/tools/visual-check-runtime/run-visual-check.mjs\" --project-root .",
+    "visual-check:desktop": "node \"C:/Users/bajos/.codex/tools/visual-check-runtime/run-visual-check.mjs\" --project-root . --width 1440 --height 1024 --out screenshots/visual-check-desktop.png",
+    "visual-check:mobile": "node \"C:/Users/bajos/.codex/tools/visual-check-runtime/run-visual-check.mjs\" --project-root . --width 430 --height 932 --out screenshots/visual-check-mobile.png"
   },
   "dependencies": {
     "@fontsource-variable/dm-sans": "^5.2.6",

@@ -1,0 +1,34 @@
+{
+  "artifact": "Dividend Dash",
+  "round": "after",
+  "categories": {
+    "art_direction_consistency": { "score": 4, "threshold": 4, "critical": false, "evidence": "JoGo board palette, mascot, robot, rounded material language and local type are consistent across home, play, repair and results." },
+    "visual_hierarchy": { "score": 4, "threshold": 4, "critical": true, "evidence": "Prompt, division workbench and three gates read in that order at 1024x768." },
+    "typography_readability": { "score": 4, "threshold": 4, "critical": true, "evidence": "Bundled DM Sans, 15px hard floor, 22px-plus prompts and inspected iPad captures." },
+    "layout_spacing": { "score": 4, "threshold": 4, "critical": false, "evidence": "Strict landscape overflow assertions and portrait horizontal-overflow checks pass." },
+    "character_object_quality": { "score": 4, "threshold": 4, "critical": false, "evidence": "Approved high-resolution Mr Jo and robot assets retain clear silhouettes at home, play and results sizes." },
+    "touch_usability": { "score": 5, "threshold": 5, "critical": true, "evidence": "Gate and control targets exceed 44px; Pointer Events path completed under touch-enabled browser context." },
+    "input_responsiveness": { "score": 4, "threshold": 4, "critical": true, "evidence": "Pointer selection, keyboard steering, Enter commit, pause and restart all change state immediately." },
+    "motion_transitions": { "score": 4, "threshold": 4, "critical": false, "evidence": "Gate travel and lane motion communicate state; reduced-motion mode removes non-essential travel." },
+    "correct_answer_feedback": { "score": 4, "threshold": 4, "critical": true, "evidence": "Success feedback names the completed equation and writes the value into the tableau." },
+    "mistake_recovery_feedback": { "score": 5, "threshold": 4, "critical": true, "evidence": "Progressive clue identifies the relationship, preserves the item and requires repair." },
+    "audio_integration": { "score": 3, "threshold": 3, "critical": false, "evidence": "Distinct WebAudio success, mistake and finish cues with persistent mute; silent play remains complete." },
+    "performance_smoothness": { "score": 4, "threshold": 4, "critical": true, "evidence": "Static DOM/SVG/CSS build, local assets, no runtime fetch failures, and stable automated interaction." },
+    "first_ten_seconds": { "score": 4, "threshold": 4, "critical": true, "evidence": "Objective, operation sequence, pace and Start action fit in the first 1024x768 viewport." },
+    "restart_replay_flow": { "score": 5, "threshold": 5, "critical": true, "evidence": "Restart and Next Route produce step zero, zero score and a playable state." },
+    "educational_clarity": { "score": 5, "threshold": 5, "critical": true, "evidence": "18/20 pre-build score, passed Removal Test, visible operation rail, deterministic tableau and transfer-focused results." },
+    "accessibility": { "score": 4, "threshold": 4, "critical": true, "evidence": "Keyboard path, focus-visible styles, live region, semantic buttons/dialogs, non-colour labels and reduced motion." }
+  },
+  "hard_gates": {
+    "crash_free_core_loop": { "pass": true, "evidence": "Browser QA completed all representative states with no console, page, request or HTTP errors." },
+    "learning_content_preserved": { "pass": true, "evidence": "Long-division sequence and six baseline content problems are represented in the rebuilt engine." },
+    "keyboard_and_pointer": { "pass": true, "evidence": "Both paths advanced verified mathematical steps." },
+    "pause_and_restart": { "pass": true, "evidence": "Pause/resume and clean restart assertions passed." },
+    "responsive_geometry": { "pass": true, "evidence": "1024x768 landscape has no page overflow; 820x1180 portrait has no horizontal overflow." },
+    "critical_thresholds": { "pass": true, "evidence": "Every critical category meets or exceeds its threshold." },
+    "no_high_issues": { "pass": true, "evidence": "No critical or high-severity issue remains after the final rendered pass." }
+  },
+  "open_issues": [
+    { "severity": "low", "issue": "Physical Safari/iPad touch testing remains outstanding before public publication." }
+  ]
+}

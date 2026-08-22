@@ -33,6 +33,12 @@ npm run build
 
 Edit `src/data/experiences.json`, then run `npm run check:registry`.
 
+## Build or rebuild a JoGo game
+
+Read `AGENTS.md`, then start with `jogo-game-builder/CODEX_START_HERE.md`. The repository-local pack contains the mandatory learning-loop gates, visual and iPad standards, authoritative JoGo boards, and reusable static-web scaffold.
+
+Dividend Dash in `public/games/dividend-dash/` is the first verified workflow proof. It remains a non-public Studio entry until Mr Jo approves publication.
+
 An activity appears publicly only when all three conditions are true:
 
 1. `public` is `true`;

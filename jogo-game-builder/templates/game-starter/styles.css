@@ -1,0 +1,26 @@
+:root{
+  --bg:#071526;
+  --panel:#102238;
+  --panel-2:#183553;
+  --text:#f3f8ff;
+  --muted:#a9bfd4;
+  --accent:#ffd166;
+  --good:#63d64f;
+  --bad:#ef476f;
+  --line:rgba(255,255,255,.14);
+  --radius:20px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+body{overscroll-behavior:none;touch-action:manipulation}
+button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.app-shell{width:min(1180px,100%);margin:0 auto;padding:14px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.eyebrow{font-size:12px;font-weight:900;letter-spacing:.12em;color:var(--accent)}
+h1{margin:2px 0 0;font-size:clamp(28px,5vw,48px)}
+.top-actions{display:flex;gap:8px}.icon-button,.dev-button{min-width:48px;min-height:48px;border:1px solid var(--line);border-radius:14px;background:var(--panel-2);color:var(--text);font-weight:900}.dev-button{padding:0 14px;color:var(--accent)}
+.screen{min-height:640px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg,var(--panel),#081625);overflow:hidden}
+.center{min-height:640px;display:grid;place-items:center;padding:24px;text-align:center}.card{width:min(760px,100%);padding:28px;border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,.06)}
+.primary{min-height:54px;padding:0 22px;border:0;border-radius:16px;background:var(--good);color:#08210c;font-weight:1000;box-shadow:0 5px 0 rgba(0,0,0,.28)}.primary:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.28)}
+.dev-dialog{border:0;background:transparent;padding:0}.dev-dialog::backdrop{background:rgba(0,0,0,.7)}.dev-panel{width:min(680px,calc(100vw - 24px));max-height:80vh;overflow:auto;background:#0c1d31;color:var(--text);border:1px solid var(--line);border-radius:20px;padding:18px}.dev-head{display:flex;align-items:center;justify-content:space-between;color:var(--accent)}.dev-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.dev-actions button{min-height:50px;border:1px solid var(--line);border-radius:12px;background:#173553;color:var(--text);font-weight:800}
+@media(max-width:800px){.app-shell{padding:8px}.screen,.center{min-height:calc(100vh - 88px)}.dev-actions{grid-template-columns:1fr}}

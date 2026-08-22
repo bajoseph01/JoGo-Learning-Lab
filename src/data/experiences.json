@@ -2,6 +2,27 @@
   "updated": "2026-08-22",
   "experiences": [
     {
+      "id": "dividend-dash",
+      "title": "Dividend Dash",
+      "subject": "Mathematics",
+      "grades": ["4", "5", "6"],
+      "status": "testing",
+      "public": false,
+      "url": null,
+      "sourceFolder": "public/games/dividend-dash",
+      "repositoryUrl": "https://github.com/bajoseph01/JoGo-Learning-Lab",
+      "version": "Workflow proof",
+      "learningObjective": "Use the divide, multiply, subtract and bring-down sequence to construct long division accurately.",
+      "learnerAction": "Learners steer through number-gates that become the quotient, product, remainder and next working number in the visible division tableau.",
+      "evidence": "First-attempt accuracy by operation, completed tableau, repair steps and final quotient.",
+      "sessionLength": "3–8 min",
+      "input": ["Touch", "Keyboard", "Mouse"],
+      "visual": "division",
+      "learningScore": 18,
+      "lastChecked": "2026-08-22",
+      "note": "Gated workflow proof passed automated browser and iPad-geometry QA. Remains unpublished pending Mr Jo approval and a physical Safari/iPad touch pass."
+    },
+    {
       "id": "money-builder",
       "title": "JoGo Money Builder",
       "subject": "Mathematics",

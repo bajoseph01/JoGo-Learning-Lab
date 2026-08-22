@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#071526" />
+  <title>Jo⚡Go Game Starter</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">JO⚡GO LEARNING GAMES</div>
+        <h1 id="gameTitle">Game Starter</h1>
+      </div>
+      <div class="top-actions">
+        <button id="soundButton" class="icon-button" aria-label="Toggle sound">♪</button>
+        <button id="devButton" class="dev-button">DEV ⚙</button>
+      </div>
+    </header>
+
+    <main id="screen" class="screen" aria-live="polite"></main>
+  </div>
+
+  <dialog id="devDialog" class="dev-dialog">
+    <form method="dialog" class="dev-panel">
+      <div class="dev-head">
+        <strong>DEV MODE</strong>
+        <button value="cancel" class="icon-button" aria-label="Close developer panel">×</button>
+      </div>
+      <p>Jump directly to game states. DEV sessions never save learner progress.</p>
+      <div id="devActions" class="dev-actions"></div>
+    </form>
+  </dialog>
+
+  <script src="data/content.js"></script>
+  <script src="src/storage.js"></script>
+  <script src="src/sound.js"></script>
+  <script src="src/game.js"></script>
+  <script src="src/dev-mode.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>

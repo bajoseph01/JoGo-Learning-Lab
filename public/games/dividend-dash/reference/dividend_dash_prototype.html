@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dividend Dash - Long Division Prototype</title>
+  <style>
+    :root{
+      --bg:#08121f;--panel:#101f33;--text:#eef6ff;--muted:#9fb6cc;--accent:#ffd166;--good:#06d6a0;--bad:#ef476f;--blue:#118ab2;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(circle at top,#17324f 0%,#08121f 55%,#04080e 100%);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);display:flex;min-height:100vh;align-items:center;justify-content:center;padding:18px}
+    .wrap{width:min(1100px,100%)}
+    header{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap}
+    h1{font-size:clamp(24px,4vw,42px);line-height:1;margin:0;color:var(--accent);letter-spacing:.5px}
+    .tag{color:var(--muted);margin-top:6px;font-size:15px}
+    .card{background:linear-gradient(180deg,rgba(16,31,51,.96),rgba(11,22,36,.96));border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 50px rgba(0,0,0,.35);border-radius:18px;overflow:hidden}
+    #game{display:block;width:100%;height:auto;background:#07131f;touch-action:none}
+    .hud{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px;background:rgba(0,0,0,.22);border-top:1px solid rgba(255,255,255,.1)}
+    .hud div{background:rgba(255,255,255,.06);padding:9px 10px;border-radius:12px;font-size:14px;color:var(--muted)}
+    .hud strong{display:block;color:var(--text);font-size:18px;margin-top:2px}
+    .controls{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:12px;color:var(--muted);font-size:14px;flex-wrap:wrap}
+    button{border:0;border-radius:12px;padding:10px 14px;background:var(--accent);color:#1b1400;font-weight:800;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+    button.secondary{background:#213a59;color:var(--text);border:1px solid rgba(255,255,255,.15)}
+    .note{margin-top:12px;color:var(--muted);font-size:14px;line-height:1.45}
+    kbd{background:#1b314d;border:1px solid rgba(255,255,255,.18);border-bottom-width:3px;padding:2px 6px;border-radius:6px;color:#fff}
+    @media(max-width:700px){.hud{grid-template-columns:repeat(2,1fr)}header{display:block}.controls{font-size:13px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Dividend Dash</h1>
+        <div class="tag">A tiny playable prototype: long division as a racing-gate game.</div>
+      </div>
+      <div>
+        <button id="restartBtn">Restart Race</button>
+        <button class="secondary" id="helpBtn">Show How It Works</button>
+      </div>
+    </header>
+
+    <section class="card">
+      <canvas id="game" width="1000" height="560" aria-label="Dividend Dash game canvas"></canvas>
+      <div class="hud">
+        <div>Problem<strong id="problemText">736 ÷ 4</strong></div>
+        <div>Current Step<strong id="stepText">Divide</strong></div>
+        <div>Score<strong id="scoreText">0</strong></div>
+        <div>Integrity<strong id="lifeText">100%</strong></div>
+      </div>
+    </section>
+
+    <div class="controls">
+      <div>Move: <kbd>←</kbd> <kbd>→</kbd> or <kbd>A</kbd> <kbd>D</kbd>. Pick the correct answer gate before it reaches your ship.</div>
+      <div>Goal: learn the long-division rhythm: <strong>divide → multiply → subtract → bring down → repeat</strong>.</div>
+    </div>
+    <p class="note" id="teacherNote">Teacher view: This prototype deliberately trains the sequence of long division, not just isolated arithmetic. Each gate is a retrieval step. Correct choices keep the road stable; wrong choices damage the ship and show a hint.</p>
+  </div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const laneXs = [W*0.25, W*0.5, W*0.75];
+  const playerY = H - 88;
+  const problemText = document.getElementById('problemText');
+  const stepText = document.getElementById('stepText');
+  const scoreText = document.getElementById('scoreText');
+  const lifeText = document.getElementById('lifeText');
+  const note = document.getElementById('teacherNote');
+
+  const baseProblems = [
+    {dividend:736, divisor:4},
+    {dividend:852, divisor:3},
+    {dividend:945, divisor:5},
+    {dividend:672, divisor:6},
+    {dividend:984, divisor:8},
+    {dividend:891, divisor:9}
+  ];
+
+  let state;
+
+  function buildSteps(dividend, divisor){
+    const digits = String(dividend).split('').map(Number);
+    let partial = 0;
+    let quotientDigits = [];
+    const steps = [];
+
+    for(let i=0;i<digits.length;i++){
+      partial = partial * 10 + digits[i];
+      const q = Math.floor(partial / divisor);
+      const product = q * divisor;
+      const remainder = partial - product;
+      const prefix = quotientDigits.length ? quotientDigits.join('') : '';
+
+      steps.push({
+        kind:'Divide',
+        prompt:`How many ${divisor}s fit into ${partial}?`,
+        answer:q,
+        hint:`Divide only the current working number: ${partial} ÷ ${divisor}.`,
+        explain:`${partial} ÷ ${divisor} gives ${q} remainder ${remainder}.`
+      });
+      steps.push({
+        kind:'Multiply',
+        prompt:`${q} × ${divisor} = ?`,
+        answer:product,
+        hint:`Use the quotient digit you just chose: ${q}.`,
+        explain:`${q} × ${divisor} = ${product}.`
+      });
+      steps.push({
+        kind:'Subtract',
+        prompt:`${partial} − ${product} = ?`,
+        answer:remainder,
+        hint:`Subtract the product from the working number.`,
+        explain:`${partial} − ${product} = ${remainder}.`
+      });
+
+      quotientDigits.push(q);
+      partial = remainder;
+      if(i < digits.length-1){
+        steps.push({
+          kind:'Bring Down',
+          prompt:`Bring down the next digit: ${digits[i+1]}`,
+          answer:digits[i+1],
+          hint:`After subtracting, pull down the next digit from the dividend.`,
+          explain:`Bring down ${digits[i+1]} to continue the division.`
+        });
+      }
+    }
+
+    const quotient = Math.floor(dividend / divisor);
+    const remainder = dividend % divisor;
+    steps.push({
+      kind:'Finish',
+      prompt:`Final answer: ${dividend} ÷ ${divisor} = ?`,
+      answer: remainder ? `${quotient} r ${remainder}` : quotient,
+      hint:`Read the quotient across the top. Check the final remainder.`,
+      explain:`${dividend} ÷ ${divisor} = ${quotient}${remainder ? ' r ' + remainder : ''}.`
+    });
+    return {steps, quotient, remainder};
+  }
+
+  function makeOptions(answer){
+    if(typeof answer === 'string') return shuffle([answer, answer.replace(' r ',' r ') === answer ? 'wrong' : '0', 'none']).slice(0,3);
+    const offsets = [-2,-1,1,2,3,-3,5,-5].filter(o => answer + o >= 0);
+    const opts = [answer];
+    for(const off of shuffle(offsets)){
+      if(opts.length >= 3) break;
+      const v = answer + off;
+      if(!opts.includes(v)) opts.push(v);
+    }
+    while(opts.length < 3) opts.push(opts.length + answer + 1);
+    return shuffle(opts);
+  }
+
+  function shuffle(arr){
+    const a = [...arr];
+    for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+    return a;
+  }
+
+  function reset(){
+    const p = baseProblems[Math.floor(Math.random()*baseProblems.length)];
+    const built = buildSteps(p.dividend, p.divisor);
+    state = {
+      dividend:p.dividend, divisor:p.divisor, built,
+      stepIndex:0, score:0, integrity:100,
+      lane:1, targetLane:1, roadOffset:0, gateY:-90,
+      options:[], flash:null, flashTimer:0, paused:false, complete:false,
+      speed:2.9
+    };
+    setGate();
+    updateHud();
+    note.textContent = 'Teacher view: This prototype deliberately trains the sequence of long division, not just isolated arithmetic. Each gate is a retrieval step. Correct choices keep the road stable; wrong choices damage the ship and show a hint.';
+  }
+
+  function setGate(){
+    const step = state.built.steps[state.stepIndex];
+    state.options = makeOptions(step.answer);
+    state.gateY = -95;
+  }
+
+  function updateHud(){
+    problemText.textContent = `${state.dividend} ÷ ${state.divisor}`;
+    const step = state.built.steps[state.stepIndex];
+    stepText.textContent = step ? step.kind : 'Complete';
+    scoreText.textContent = state.score;
+    lifeText.textContent = Math.max(0, state.integrity) + '%';
+  }
+
+  function answerEqual(a,b){ return String(a).trim().toLowerCase() === String(b).trim().toLowerCase(); }
+
+  function choose(){
+    if(state.complete) return;
+    const step = state.built.steps[state.stepIndex];
+    const chosen = state.options[state.lane];
+    const correct = answerEqual(chosen, step.answer);
+    if(correct){
+      state.score += 100 + state.stepIndex*10;
+      state.flash = {type:'good', text:`Correct: ${step.explain}`};
+      state.flashTimer = 90;
+      state.stepIndex++;
+      if(state.stepIndex >= state.built.steps.length){
+        state.complete = true;
+        state.flash = {type:'good', text:`Race complete! ${state.dividend} ÷ ${state.divisor} = ${state.built.quotient}${state.built.remainder ? ' r ' + state.built.remainder : ''}`};
+        state.flashTimer = 9999;
+        note.textContent = 'Finished. This is where a full version would unlock the next track, show a worked solution, and save the learner’s weak step pattern.';
+      } else {
+        setGate();
+      }
+    } else {
+      state.integrity -= 20;
+      state.flash = {type:'bad', text:`Careful: ${step.hint}`};
+      state.flashTimer = 120;
+      state.gateY = -80;
+      if(state.integrity <= 0){
+        state.complete = true;
+        state.flash = {type:'bad', text:'Ship crashed. Restart and try to protect the long-division sequence.'};
+        state.flashTimer = 9999;
+      }
+    }
+    updateHud();
+  }
+
+  function drawBackground(){
+    const grad = ctx.createLinearGradient(0,0,0,H);
+    grad.addColorStop(0,'#102b45'); grad.addColorStop(1,'#06101a');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    for(let i=0;i<120;i++){
+      const x = (i*83 + 17) % W;
+      const y = (i*47 + Math.floor(state.roadOffset*0.2)) % H;
+      ctx.fillStyle = i%7===0 ? '#ffd166' : '#dff3ff';
+      ctx.fillRect(x,y,2,2);
+    }
+    ctx.restore();
+  }
+
+  function drawRoad(){
+    const topW = 330, botW = 910, topY=88, botY=H;
+    ctx.fillStyle = '#162640';
+    ctx.beginPath();
+    ctx.moveTo(W/2 - topW/2, topY); ctx.lineTo(W/2 + topW/2, topY);
+    ctx.lineTo(W/2 + botW/2, botY); ctx.lineTo(W/2 - botW/2, botY); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.24)'; ctx.lineWidth=4; ctx.stroke();
+
+    for(let l=1;l<3;l++){
+      const xTop = W/2 - topW/2 + topW*l/3;
+      const xBot = W/2 - botW/2 + botW*l/3;
+      ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth=3; ctx.setLineDash([16,18]);
+      ctx.beginPath(); ctx.moveTo(xTop,topY); ctx.lineTo(xBot,botY); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    for(let y=(state.roadOffset%60)+80;y<H;y+=60){
+      const t = (y-topY)/(botY-topY);
+      const width = topW + (botW-topW)*t;
+      ctx.strokeStyle = 'rgba(17,138,178,.28)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(W/2-width/2,y); ctx.lineTo(W/2+width/2,y); ctx.stroke();
+    }
+  }
+
+  function laneXAtY(lane,y){
+    const topW = 330, botW=910, topY=88, botY=H;
+    const t = Math.max(0, Math.min(1,(y-topY)/(botY-topY)));
+    const width = topW + (botW-topW)*t;
+    return W/2 - width/2 + width*(lane+.5)/3;
+  }
+
+  function drawGate(){
+    if(state.complete && state.gateY > playerY) return;
+    const step = state.built.steps[state.stepIndex];
+    const y = state.gateY;
+    for(let i=0;i<3;i++){
+      const x = laneXAtY(i,y);
+      const w = 160 + (y/H)*80;
+      const h = 58;
+      ctx.fillStyle = 'rgba(255,209,102,.94)';
+      ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth=3;
+      roundRect(ctx,x-w/2,y-h/2,w,h,14,true,true);
+      ctx.fillStyle='#211704'; ctx.font='800 30px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(state.options[i],x,y+2);
+    }
+    ctx.fillStyle='#eef6ff'; ctx.font='800 23px system-ui'; ctx.textAlign='center';
+    wrapText(step.prompt, W/2, 50, 760, 28);
+  }
+
+  function drawPlayer(){
+    const x = laneXAtY(state.lane, playerY);
+    ctx.save();
+    ctx.translate(x, playerY);
+    ctx.fillStyle='#118ab2';
+    ctx.beginPath(); ctx.moveTo(0,-32); ctx.lineTo(42,28); ctx.lineTo(0,15); ctx.lineTo(-42,28); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.85)'; ctx.lineWidth=3; ctx.stroke();
+    ctx.fillStyle='#06d6a0'; ctx.beginPath(); ctx.ellipse(0,-4,14,23,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,209,102,.9)'; ctx.beginPath(); ctx.moveTo(-24,28); ctx.lineTo(-12,48); ctx.lineTo(0,28); ctx.fill(); ctx.beginPath(); ctx.moveTo(24,28); ctx.lineTo(12,48); ctx.lineTo(0,28); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawFlash(){
+    if(!state.flash || state.flashTimer<=0) return;
+    const good = state.flash.type === 'good';
+    ctx.fillStyle = good ? 'rgba(6,214,160,.92)' : 'rgba(239,71,111,.92)';
+    roundRect(ctx,90,H-160,W-180,62,16,true,false);
+    ctx.fillStyle = good ? '#03251a' : '#fff7fb';
+    ctx.font='800 22px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    wrapText(state.flash.text,W/2,H-129,W-220,26);
+  }
+
+  function drawStatus(){
+    ctx.fillStyle='rgba(0,0,0,.35)';
+    roundRect(ctx,18,18,215,66,12,true,false);
+    ctx.fillStyle='#9fb6cc'; ctx.font='700 14px system-ui'; ctx.textAlign='left'; ctx.fillText('LONG DIVISION LOOP',34,42);
+    ctx.fillStyle='#eef6ff'; ctx.font='900 18px system-ui'; ctx.fillText('D → M → S → B ↓',34,67);
+
+    const total = state.built.steps.length;
+    ctx.fillStyle='rgba(255,255,255,.12)'; roundRect(ctx,W-250,28,220,18,8,true,false);
+    ctx.fillStyle='#06d6a0'; roundRect(ctx,W-250,28,220*(state.stepIndex/total),18,8,true,false);
+    ctx.fillStyle='#eef6ff'; ctx.font='700 13px system-ui'; ctx.textAlign='right'; ctx.fillText(`Step ${Math.min(state.stepIndex+1,total)} of ${total}`,W-31,64);
+  }
+
+  function roundRect(ctx,x,y,w,h,r,fill,stroke){
+    ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); if(fill)ctx.fill(); if(stroke)ctx.stroke();
+  }
+
+  function wrapText(text,x,y,maxWidth,lineHeight){
+    const words = String(text).split(' '); let line='', lines=[];
+    for(const word of words){
+      const test = line ? line+' '+word : word;
+      if(ctx.measureText(test).width > maxWidth && line){ lines.push(line); line=word; } else line=test;
+    }
+    lines.push(line);
+    lines.forEach((ln,i)=>ctx.fillText(ln,x,y+i*lineHeight));
+  }
+
+  function loop(){
+    drawBackground(); drawRoad(); drawGate(); drawPlayer(); drawStatus(); drawFlash();
+    if(!state.complete){
+      state.roadOffset += state.speed;
+      state.gateY += state.speed;
+      if(state.gateY > playerY + 12) choose();
+    }
+    if(state.flashTimer>0) state.flashTimer--;
+    requestAnimationFrame(loop);
+  }
+
+  document.addEventListener('keydown', e => {
+    if(['ArrowLeft','a','A'].includes(e.key)){ state.lane = Math.max(0,state.lane-1); }
+    if(['ArrowRight','d','D'].includes(e.key)){ state.lane = Math.min(2,state.lane+1); }
+    if(e.key === 'Enter' || e.key === ' ') choose();
+  });
+  canvas.addEventListener('pointerdown', e => {
+    const rect = canvas.getBoundingClientRect(); const x = e.clientX - rect.left; const third = rect.width/3;
+    state.lane = x < third ? 0 : x < third*2 ? 1 : 2;
+  });
+  document.getElementById('restartBtn').addEventListener('click', reset);
+  document.getElementById('helpBtn').addEventListener('click', () => {
+    note.textContent = 'How it works: every gate is one mental move in long division. Learners must classify the current step, retrieve the answer, and stay in sequence. This can later become levels, boss races, learner analytics, Afrikaans/English instructions, and teacher-generated problems.';
+  });
+
+  reset(); loop();
+})();
+</script>
+</body>
+</html>
