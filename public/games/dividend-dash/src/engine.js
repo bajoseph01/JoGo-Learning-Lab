@@ -256,17 +256,21 @@ export function completeThrough(state, targetIndex) {
 }
 
 export function getTableauGeometry(state) {
-  const digitStartX = 126;
-  const digitGap = 44;
+  const digitStartX = 132;
+  const digitGap = 48;
   return {
-    width: 340,
-    height: 244,
+    width: 380,
+    height: 320,
     divisorX: 58,
-    bracketX: 100,
-    dividendY: 66,
-    quotientY: 28,
+    bracketX: 96,
+    bracketTopY: 65,
+    dividendY: 112,
+    quotientY: 39,
+    quotientSlotY: 9,
+    quotientSlotWidth: 40,
+    quotientSlotHeight: 40,
     digitXs: state.route.digits.map((_, index) => digitStartX + index * digitGap),
-    cycleRows: state.route.cycles.map((_, index) => 92 + index * 48),
+    cycleRows: state.route.cycles.map((_, index) => 158 + index * 52),
   };
 }
 
@@ -275,12 +279,14 @@ export function validateTableauGeometry(state) {
   const errors = [];
   if (geometry.digitXs.length !== state.route.digits.length) errors.push("Every dividend digit needs one x-position.");
   geometry.digitXs.forEach((x, index) => {
-    if (index > 0 && x - geometry.digitXs[index - 1] !== 44) errors.push("Dividend digit spacing must remain equal.");
+    if (index > 0 && x - geometry.digitXs[index - 1] !== 48) errors.push("Dividend digit spacing must remain equal.");
   });
   state.route.cycles.forEach((cycle, index) => {
     if (geometry.digitXs[cycle.digitIndex] === undefined) errors.push(`Cycle ${index} quotient has no dividend anchor.`);
   });
   if (!(geometry.bracketX < geometry.digitXs[0])) errors.push("Division bracket must sit before dividend digits.");
+  if (geometry.quotientSlotY + geometry.quotientSlotHeight > geometry.bracketTopY - 12) errors.push("Quotient slots must not crowd the division bar.");
+  if (geometry.dividendY - geometry.bracketTopY < 40) errors.push("Dividend digits must remain clearly below the division bar.");
   return errors;
 }
 

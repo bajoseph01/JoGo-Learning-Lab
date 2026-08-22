@@ -45,6 +45,38 @@ async function capture(page, name) {
   await page.screenshot({ path: path.join(evidenceDir, name) });
 }
 
+async function captureLocator(page, selector, name) {
+  await settle(page);
+  await page.locator(selector).screenshot({ path: path.join(evidenceDir, name) });
+}
+
+async function assertTableauLegibility(page) {
+  const metrics = await page.locator(".tableau").evaluate((svg) => {
+    const slots = [...svg.querySelectorAll('[data-role="quotient-slot"]')];
+    const activeSlot = svg.querySelector('[data-role="quotient-slot"].is-active');
+    const activeValue = svg.querySelector('[data-role="quotient-value"].is-active');
+    const activeDigit = svg.querySelector('.dividend-digit.is-active');
+    const bracket = svg.querySelector('[data-role="division-bracket"]');
+    const slotBox = activeSlot?.getBBox();
+    const digitBox = activeDigit?.getBBox();
+    const barY = Number(bracket?.dataset.barY);
+    return {
+      slotCount: slots.length,
+      activeText: activeValue?.textContent,
+      activeFill: activeValue ? getComputedStyle(activeValue).fill : "",
+      slotBottom: slotBox ? slotBox.y + slotBox.height : NaN,
+      digitTop: digitBox?.y ?? NaN,
+      barY,
+    };
+  });
+  assert.equal(metrics.slotCount, 3, "tableau must expose three visible quotient positions");
+  assert.equal(metrics.activeText, "?", "divide step must place its unknown in the quotient slot");
+  assert.notEqual(metrics.activeFill, "rgb(167, 181, 202)", "active unknown must not use ghost contrast");
+  assert.ok(metrics.slotBottom <= metrics.barY - 12, `quotient slot crowds the division bar (${metrics.slotBottom} > ${metrics.barY - 12})`);
+  assert.ok(metrics.digitTop >= metrics.barY + 8, `division bar crowds the dividend digits (${metrics.digitTop} < ${metrics.barY + 8})`);
+  assert.equal(await page.locator('[data-role="product-value"]').count(), 0, "divide step must not show a multiply-row unknown");
+}
+
 async function assertViewport(page, label) {
   const metrics = await page.evaluate(() => {
     const screen = document.getElementById("screen").getBoundingClientRect();
@@ -111,8 +143,10 @@ try {
   await settle(page);
   await assertViewport(page, "iPad landscape active play");
   assert.equal((await page.locator(".number-gate").count()), 3);
+  await assertTableauLegibility(page);
   await capture(page, "02-active-play-ipad-landscape.png");
-  results.push("active play exposes three touch gates without horizontal overflow");
+  await captureLocator(page, ".tableau-wrap", "02a-tableau-legibility-closeup.png");
+  results.push("active play exposes three touch gates and a high-contrast, non-overlapping division tableau");
 
   const firstStep = await page.evaluate(() => window.DividendDash.snapshot());
   await page.locator(".number-gate").nth(firstStep.correctLane).click();
@@ -147,7 +181,9 @@ try {
   await page.evaluate(() => window.DividendDash.devJump("bring-down"));
   const bring = await page.evaluate(() => window.DividendDash.snapshot());
   assert.equal(bring.step, "bring-down");
+  assert.equal(await page.locator(".dividend-digit.is-active").getAttribute("data-index"), "1");
   await capture(page, "06-bring-down-ipad-landscape.png");
+  await captureLocator(page, ".tableau-wrap", "06a-bring-down-tableau-closeup.png");
   await page.evaluate(() => window.DividendDash.devJump("pit-stop"));
   await capture(page, "07-pit-stop-ipad-landscape.png");
   await page.evaluate(() => window.DividendDash.devJump("results"));

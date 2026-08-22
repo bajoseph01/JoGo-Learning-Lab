@@ -18,6 +18,8 @@ Repository selected: `D:\Users\bajos\OneDrive - Merrifield Prep & College\2026_C
 - Built the static game under `public/games/dividend-dash/` with local assets, touch and keyboard input, pause/restart, three paces, progressive repair clues, results evidence, and no-save DEV state jumps.
 - Added Dividend Dash to Studio as `testing`, `public: false`; it is not approved for public catalogue listing yet.
 - Added shared visual-check scripts to `package.json` and a reusable browser gauntlet at `qa/browser-qa.mjs`.
+- After Mr Jo rejected the initial tableau as unreadable, rebuilt its visual hierarchy: visible quotient slots replaced faint dots, active unknowns use strong navy/yellow contrast, the division bar no longer crowds glyphs, only the current operation renders an unknown, and the viewport expands revealed working instead of shrinking the opening maths into empty space.
+- Strengthened both `jogo-game-builder` skill copies and the educational geometry standard with a mandatory mathematical-legibility close-up gate.
 
 ## Key files for next session
 
@@ -68,6 +70,7 @@ Verified results:
 - 1024×768 landscape: no horizontal or vertical page overflow;
 - 820×1180 portrait: no horizontal overflow;
 - DEV state jumps do not mutate learner progress.
+- Tableau close-ups `02a` and `06a` were inspected at the target render size; browser assertions now reject faint active unknowns, misplaced operation unknowns, quotient/bar crowding, bar/dividend crowding, and incorrect bring-down digit focus.
 
 Evidence screenshots `00` through `10` are under `public/games/dividend-dash/quality/gauntlet/evidence/`.
 

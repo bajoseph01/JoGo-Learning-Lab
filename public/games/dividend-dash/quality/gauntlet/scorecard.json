@@ -1,10 +1,10 @@
 {
   "artifact": "Dividend Dash",
-  "round": "after",
+  "round": "repair-after-user-feedback",
   "categories": {
     "art_direction_consistency": { "score": 4, "threshold": 4, "critical": false, "evidence": "JoGo board palette, mascot, robot, rounded material language and local type are consistent across home, play, repair and results." },
-    "visual_hierarchy": { "score": 4, "threshold": 4, "critical": true, "evidence": "Prompt, division workbench and three gates read in that order at 1024x768." },
-    "typography_readability": { "score": 4, "threshold": 4, "critical": true, "evidence": "Bundled DM Sans, 15px hard floor, 22px-plus prompts and inspected iPad captures." },
+    "visual_hierarchy": { "score": 4, "threshold": 4, "critical": true, "evidence": "Repaired after user feedback: the responsive tableau viewport enlarges revealed working, active digits are visibly bounded, and the prompt, workbench and gates read in that order at 1024x768." },
+    "typography_readability": { "score": 4, "threshold": 4, "critical": true, "evidence": "Repaired after user feedback: faint quotient dots were replaced by 40-unit answer slots, the active unknown uses dark navy on yellow, maths glyphs render at 34 SVG units, and close-up evidence was visually inspected." },
     "layout_spacing": { "score": 4, "threshold": 4, "critical": false, "evidence": "Strict landscape overflow assertions and portrait horizontal-overflow checks pass." },
     "character_object_quality": { "score": 4, "threshold": 4, "critical": false, "evidence": "Approved high-resolution Mr Jo and robot assets retain clear silhouettes at home, play and results sizes." },
     "touch_usability": { "score": 5, "threshold": 5, "critical": true, "evidence": "Gate and control targets exceed 44px; Pointer Events path completed under touch-enabled browser context." },
@@ -24,7 +24,7 @@
     "learning_content_preserved": { "pass": true, "evidence": "Long-division sequence and six baseline content problems are represented in the rebuilt engine." },
     "keyboard_and_pointer": { "pass": true, "evidence": "Both paths advanced verified mathematical steps." },
     "pause_and_restart": { "pass": true, "evidence": "Pause/resume and clean restart assertions passed." },
-    "responsive_geometry": { "pass": true, "evidence": "1024x768 landscape has no page overflow; 820x1180 portrait has no horizontal overflow." },
+    "responsive_geometry": { "pass": true, "evidence": "1024x768 landscape has no page overflow; 820x1180 portrait has no horizontal overflow; browser bounds assert quotient/bar and bar/dividend clearance." },
     "critical_thresholds": { "pass": true, "evidence": "Every critical category meets or exceeds its threshold." },
     "no_high_issues": { "pass": true, "evidence": "No critical or high-severity issue remains after the final rendered pass." }
   },

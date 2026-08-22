@@ -6,6 +6,7 @@ import {
   completeThrough,
   createGameState,
   currentStep,
+  getTableauGeometry,
   learningSummary,
   selectLane,
   validateTableauGeometry,
@@ -83,5 +84,8 @@ test("tableau geometry is deterministic for every content problem", () => {
   for (const [dividend, divisor] of problems) {
     const state = createGameState({ id: `${dividend}-${divisor}`, dividend, divisor });
     assert.deepEqual(validateTableauGeometry(state), []);
+    const geometry = getTableauGeometry(state);
+    assert.ok(geometry.quotientSlotY + geometry.quotientSlotHeight <= geometry.bracketTopY - 12);
+    assert.ok(geometry.dividendY - geometry.bracketTopY >= 40);
   }
 });

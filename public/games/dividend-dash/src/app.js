@@ -100,44 +100,65 @@ function tableauSvg() {
 
   const quotient = state.route.cycles.map((cycle) => {
     const values = completedByCycle.get(cycle.cycleIndex) || {};
-    const value = values.divide ? cycle.quotientDigit : "·";
-    const className = current?.kind === "divide" && current.cycleIndex === cycle.cycleIndex ? "active-value" : values.divide ? "" : "ghost";
-    return `<text class="${className}" x="${geometry.digitXs[cycle.digitIndex]}" y="${geometry.quotientY}">${value}</text>`;
+    const isComplete = Boolean(values.divide);
+    const isActive = current?.kind === "divide" && current.cycleIndex === cycle.cycleIndex;
+    const x = geometry.digitXs[cycle.digitIndex];
+    const slotClass = isActive ? "is-active" : isComplete ? "is-complete" : "is-waiting";
+    const value = isComplete ? cycle.quotientDigit : isActive ? "?" : "";
+    return `
+      <rect class="quotient-slot ${slotClass}" data-role="quotient-slot" x="${x - geometry.quotientSlotWidth / 2}" y="${geometry.quotientSlotY}" width="${geometry.quotientSlotWidth}" height="${geometry.quotientSlotHeight}" rx="10" />
+      ${value !== "" ? `<text class="quotient-value ${isActive ? "is-active" : ""}" data-role="quotient-value" x="${x}" y="${geometry.quotientY}">${value}</text>` : ""}`;
   }).join("");
 
-  const dividendDigits = state.route.digits.map((digit, index) => `<text x="${geometry.digitXs[index]}" y="${geometry.dividendY}">${digit}</text>`).join("");
+  const activeCycleDigitIndex = current?.cycleIndex !== undefined ? state.route.cycles[current.cycleIndex]?.digitIndex : -1;
+  const activeDigitIndex = current?.kind === "bring-down" ? activeCycleDigitIndex + 1 : activeCycleDigitIndex;
+  const dividendDigits = state.route.digits.map((digit, index) => {
+    const x = geometry.digitXs[index];
+    const isActive = index === activeDigitIndex;
+    return `${isActive ? `<rect class="active-digit-cell" x="${x - 20}" y="${geometry.dividendY - 32}" width="40" height="43" rx="9" />` : ""}<text class="math-number dividend-digit ${isActive ? "is-active" : ""}" data-role="dividend-digit" data-index="${index}" x="${x}" y="${geometry.dividendY}">${digit}</text>`;
+  }).join("");
+  let visibleContentBottom = geometry.dividendY + 18;
   const rows = state.route.cycles.map((cycle, cycleIndex) => {
     const values = completedByCycle.get(cycleIndex) || {};
     const y = geometry.cycleRows[cycleIndex];
     const endX = geometry.digitXs[cycle.digitIndex];
-    const product = values.multiply ? cycle.product : "";
-    const remainder = values.subtract ? cycle.remainder : "";
+    const hasProduct = Boolean(values.multiply);
+    const hasRemainder = Boolean(values.subtract);
     const bring = values["bring-down"];
-    const productClass = current?.kind === "multiply" && current.cycleIndex === cycleIndex ? "active-value" : "";
-    const remainderClass = current?.kind === "subtract" && current.cycleIndex === cycleIndex ? "active-value" : "";
+    const isCurrentCycle = current?.cycleIndex === cycleIndex;
+    const isMultiply = isCurrentCycle && current.kind === "multiply";
+    const isSubtract = isCurrentCycle && current.kind === "subtract";
+    const isBringDown = isCurrentCycle && current.kind === "bring-down";
     let row = "";
-    if (values.multiply || current?.cycleIndex === cycleIndex) {
-      row += `<text class="${product ? productClass : "ghost"}" x="${endX}" y="${y}">${product || "?"}</text>`;
+    if (hasProduct || isMultiply) {
+      visibleContentBottom = Math.max(visibleContentBottom, y + 18);
+      if (isMultiply) row += `<rect class="answer-cell" x="${endX - 24}" y="${y - 31}" width="48" height="40" rx="9" />`;
+      row += `<text class="math-number row-value ${isMultiply ? "is-active" : ""}" data-role="product-value" x="${endX}" y="${y}">${hasProduct ? cycle.product : "?"}</text>`;
       row += `<path class="math-line" d="M ${Math.max(106, endX - 54)} ${y + 10} L ${endX + 18} ${y + 10}" />`;
     }
-    if (values.subtract || current?.kind === "subtract" && current.cycleIndex === cycleIndex) {
-      row += `<text class="${remainder ? remainderClass : "ghost"}" x="${endX}" y="${y + 38}">${values.subtract ? remainder : "?"}</text>`;
+    if (hasRemainder || isSubtract) {
+      visibleContentBottom = Math.max(visibleContentBottom, y + 58);
+      if (isSubtract) row += `<rect class="answer-cell" x="${endX - 24}" y="${y + 15}" width="48" height="40" rx="9" />`;
+      row += `<text class="math-number row-value ${isSubtract ? "is-active" : ""}" data-role="remainder-value" x="${endX}" y="${y + 46}">${hasRemainder ? cycle.remainder : "?"}</text>`;
     }
-    if (bring) {
+    if (bring || isBringDown) {
+      visibleContentBottom = Math.max(visibleContentBottom, y + 58);
       const nextX = geometry.digitXs[cycle.digitIndex + 1];
-      row += `<path class="bring-arrow" d="M ${nextX} ${geometry.dividendY + 10} Q ${nextX + 18} ${y + 18} ${nextX} ${y + 38}" />`;
-      row += `<text class="active-value" x="${nextX}" y="${y + 38}">${bring.answer}</text>`;
+      row += `<path class="bring-arrow" d="M ${nextX} ${geometry.dividendY + 13} Q ${nextX + 20} ${y + 18} ${nextX} ${y + 46}" />`;
+      if (isBringDown) row += `<rect class="answer-cell" x="${nextX - 27}" y="${y + 15}" width="54" height="40" rx="9" />`;
+      row += `<text class="math-number row-value ${isBringDown ? "is-active" : ""}" data-role="bring-value" x="${nextX}" y="${y + 46}">${bring ? bring.answer : "?"}</text>`;
     }
     return row;
   }).join("");
+  const visibleHeight = Math.min(geometry.height, Math.max(190, visibleContentBottom + 16));
 
   return `
-    <svg class="tableau" viewBox="0 0 ${geometry.width} ${geometry.height}" role="img" aria-label="Long division working for ${state.route.problem.dividend} divided by ${state.route.problem.divisor}">
+    <svg class="tableau" viewBox="0 0 ${geometry.width} ${visibleHeight}" role="img" aria-label="Long division working for ${state.route.problem.dividend} divided by ${state.route.problem.divisor}">
       <defs>
         <marker id="arrowhead" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L0,7 L7,3.5 z" fill="var(--jogo-red)" /></marker>
       </defs>
-      <text x="${geometry.divisorX}" y="${geometry.dividendY}">${state.route.problem.divisor}</text>
-      <path class="bracket" d="M ${geometry.bracketX} 80 Q ${geometry.bracketX + 7} 62 ${geometry.bracketX + 20} 52 L ${geometry.width - 24} 52" />
+      <text class="math-number divisor-value" data-role="divisor" x="${geometry.divisorX}" y="${geometry.dividendY}">${state.route.problem.divisor}</text>
+      <path class="bracket" data-role="division-bracket" data-bar-y="${geometry.bracketTopY}" d="M ${geometry.bracketX} ${geometry.dividendY + 8} Q ${geometry.bracketX + 7} ${geometry.bracketTopY + 15} ${geometry.bracketX + 22} ${geometry.bracketTopY} L ${geometry.width - 24} ${geometry.bracketTopY}" />
       ${quotient}
       ${dividendDigits}
       ${rows}

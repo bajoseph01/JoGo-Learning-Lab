@@ -553,24 +553,63 @@ a:focus-visible {
 }
 
 .tableau {
-  width: min(100%, 420px);
+  width: min(100%, 460px);
   max-height: 270px;
 }
 
 .tableau text {
   fill: var(--power-blue-deep);
   font-family: var(--font-ui);
-  font-size: 25px;
-  font-weight: 800;
+  font-size: 30px;
+  font-weight: 900;
   text-anchor: middle;
 }
 
-.tableau .ghost {
-  fill: #a7b5ca;
+.tableau .math-number {
+  font-size: 34px;
+  font-variant-numeric: tabular-nums;
 }
 
-.tableau .active-value {
-  fill: var(--jogo-red);
+.tableau .quotient-slot {
+  fill: #ffffff;
+  stroke: #6f86b2;
+  stroke-width: 2.5;
+}
+
+.tableau .quotient-slot.is-waiting {
+  stroke-dasharray: 5 4;
+}
+
+.tableau .quotient-slot.is-active,
+.tableau .answer-cell {
+  fill: var(--lightning-yellow);
+  stroke: var(--power-blue-deep);
+  stroke-width: 3;
+}
+
+.tableau .quotient-slot.is-complete {
+  fill: #dce8ff;
+  stroke: var(--power-blue);
+}
+
+.tableau .quotient-value {
+  font-size: 29px;
+  font-weight: 950;
+}
+
+.tableau .quotient-value.is-active,
+.tableau .row-value.is-active {
+  fill: var(--power-blue-deep);
+}
+
+.tableau .active-digit-cell {
+  fill: #dce8ff;
+  stroke: var(--power-blue);
+  stroke-width: 2;
+}
+
+.tableau .dividend-digit.is-active {
+  fill: var(--power-blue-deep);
 }
 
 .tableau .math-line,
@@ -578,7 +617,7 @@ a:focus-visible {
   fill: none;
   stroke: var(--power-blue-dark);
   stroke-linecap: round;
-  stroke-width: 4;
+  stroke-width: 4.5;
 }
 
 .tableau .bring-arrow {

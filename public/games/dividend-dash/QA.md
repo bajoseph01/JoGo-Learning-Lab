@@ -31,9 +31,12 @@ Evidence: `qa/browser-qa.mjs` and screenshots `02` through `08` in `quality/gaun
 ## Educational geometry
 
 - [x] Every dividend digit has one deterministic x-coordinate.
-- [x] Equal place-value spacing remains 44 SVG units.
+- [x] Equal place-value spacing remains 48 SVG units.
 - [x] Quotient digits anchor above the dividend digit completing that working number.
 - [x] The division bracket remains before the first dividend digit.
+- [x] Quotient slots retain at least 12 SVG units of clearance above the division bar.
+- [x] Rendered dividend glyphs retain at least 8 SVG units of clearance below the division bar.
+- [x] Divide shows its unknown only in the quotient slot; later operation rows appear only when active or completed.
 - [x] All six problems pass `validateTableauGeometry()`.
 
 See `qa/GEOMETRY_TEST.md`.
@@ -45,7 +48,10 @@ See `qa/GEOMETRY_TEST.md`.
 - [x] Active play, feedback, controls, footer, and results fit at 1024×768 with no horizontal or vertical page overflow.
 - [x] 820×1180 portrait has no horizontal overflow and keeps gates and Lock Route reachable.
 - [x] Route-strength indicators render as three circles, not collapsed spans.
+- [x] Tight tableau captures confirm readable numbers, visible answer slots, dark active unknowns, and correct bring-down focus.
 - [x] No console errors, page errors, failed requests, or HTTP error responses.
+
+Evidence: `02a-tableau-legibility-closeup.png` and `06a-bring-down-tableau-closeup.png` in `quality/gauntlet/evidence/`.
 
 ## Play-through and transfer
 

@@ -152,6 +152,17 @@ Run QA in this order:
 
 Do not claim "QA passed" merely because code executes.
 
+### Mathematical legibility hard gate
+
+Before a procedural maths visual can pass Visual QA:
+
+- capture and inspect a tight screenshot of the actual instrument or working area at the target viewport;
+- render unknowns and active values at normal text contrast, never as pale ghost marks or tiny dots;
+- keep answer slots visibly bounded and large enough to read at the rendered size;
+- verify with deterministic geometry or browser bounds that rules, brackets, ticks, arrows and labels do not crowd or cross number glyphs;
+- ensure each operation shows only the unknown that the learner is currently solving;
+- fail the gate if the current mathematical state cannot be understood immediately from the visual alone.
+
 ## Educational geometry is functional code
 
 Rulers, dials, scales, fraction bars, clocks, number lines, graphs, maps and similar visuals are not decoration. Their geometry teaches.

@@ -58,3 +58,10 @@ A mathematically correct answer engine with an ambiguous diagram is a broken gam
 ## QA requirement
 
 For every procedural educational visual, write a small invariant test or deterministic QA mode that can render representative edge cases.
+
+Also capture a close-up at the real target viewport and fail QA when:
+
+- an active number or unknown uses low-contrast placeholder styling;
+- a line, bracket, arrow or decorative mark touches or crosses a number glyph;
+- answer positions are represented only by faint dots or other ambiguous marks;
+- the visual shows an unknown for an operation the learner is not currently solving.
