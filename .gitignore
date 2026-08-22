@@ -1,0 +1,8 @@
+node_modules/
+dist/
+screenshots/
+.visual-check/
+.DS_Store
+*.log
+.edge-profile/
+.chrome-profile/
