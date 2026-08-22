@@ -2,6 +2,13 @@
 
 A curriculum-first public library for JoGo interactive learning experiences, with an unlinked Studio catalogue for build management.
 
+## Live access
+
+- Learning Lab: <https://bajoseph01.github.io/JoGo-Learning-Lab/>
+- JoGo Studio: <https://bajoseph01.github.io/JoGo-Learning-Lab/#studio>
+
+Studio is intentionally absent from the public navigation, but it is not password-protected. See the privacy boundary below.
+
 ## Open locally
 
 ```bash
