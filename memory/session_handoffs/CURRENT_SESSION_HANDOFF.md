@@ -33,10 +33,12 @@ Repository selected: `D:\Users\bajos\OneDrive - Merrifield Prep & College\2026_C
 
 ## Running state
 
-- Local Vite dev server was started on `http://127.0.0.1:4178/` during QA.
-- Exact local game URL: `http://127.0.0.1:4178/games/dividend-dash/index.html`.
+- Local Vite dev server was stopped cleanly after QA.
+- Commit `304bcf0` (`Build JoGo game foundation and Dividend Dash proof`) was pushed to `origin/main`.
+- GitHub Pages workflow run `32595950938` completed successfully.
+- Live game URL: `https://bajoseph01.github.io/JoGo-Learning-Lab/games/dividend-dash/` (verified HTTP 200 with the correct title).
 - Dividend Dash remains non-public in the Studio registry.
-- The change set has passed final verification and is ready for commit/push as of 2026-08-22.
+- The foundation and game are committed, pushed, deployed, and verified as of 2026-08-22.
 
 ## Verification - how to confirm things still work
 
@@ -77,7 +79,7 @@ Evidence screenshots `00` through `10` are under `public/games/dividend-dash/qua
 
 ## Pick up here
 
-Inspect `git status`, review the final staged scope, commit the foundation, push `main`, then confirm the GitHub Pages workflow. Do not publish Dividend Dash in the public catalogue without Mr Jo's explicit approval and the physical iPad check.
+Run the physical Safari/iPad touch check. If Mr Jo then approves publication, change Dividend Dash from `testing`, `public: false` to a published public entry and re-run the full repository and browser gates. Do not publish before that approval.
 
 ## New Chat Prompt
 
