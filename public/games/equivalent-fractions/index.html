@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Equivalent Fractions & Simplest Form</title>
+<style>
+  :root{
+    --bg:#f5f9ff;--card:#fff;--ink:#17324d;--muted:#5f7488;--accent:#1667c9;
+    --ok:#18794e;--bad:#b42318;--line:#d9e4ef;--soft:#eaf3ff;--warn:#fff8dc;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Century Gothic",Arial,sans-serif;background:linear-gradient(180deg,#eef6ff,#f9fbfd);color:var(--ink)}
+  .wrap{max-width:900px;margin:auto;padding:22px}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:10px}
+  h1{font-size:clamp(24px,4vw,34px);margin:0}
+  .status{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .pill{background:#fff;border:2px solid var(--line);border-radius:16px;padding:9px 13px;font-weight:700;white-space:nowrap}
+  .level-track{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:14px 0 8px}
+  .level-dot{height:10px;border-radius:999px;background:#dfe9f4}.level-dot.done{background:#72b58f}.level-dot.current{background:var(--accent)}
+  .progress{height:11px;background:#dfe9f4;border-radius:999px;overflow:hidden;margin:8px 0 20px}
+  .progress>div{height:100%;background:var(--accent);width:0;transition:.25s}
+  .card{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 10px 24px rgba(23,50,77,.08)}
+  .tag{display:inline-block;background:var(--soft);color:var(--accent);font-weight:700;border-radius:999px;padding:6px 10px;margin-bottom:12px}
+  .question{font-size:clamp(22px,4vw,31px);font-weight:700;line-height:1.42;margin:6px 0 20px}
+  .frac{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;vertical-align:middle;line-height:1.02;min-width:44px;margin:0 5px;font-weight:700}
+  .frac .num,.frac .den{padding:2px 7px;min-width:100%;text-align:center}
+  .frac .num{border-bottom:2.5px solid currentColor}
+  .frac.big{font-size:1.06em;min-width:50px}
+  .choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  button.choice{font:inherit;font-size:21px;font-weight:700;padding:14px 16px;border-radius:16px;border:2px solid var(--line);background:white;color:var(--ink);cursor:pointer;min-height:72px}
+  button.choice:hover:not(:disabled){border-color:#9fc3ef;background:#f8fbff}
+  .choice.correct{border-color:var(--ok);background:#edf9f3}.choice.wrong{border-color:var(--bad);background:#fff1ef;color:#7a231d}
+  .choice:disabled{cursor:default;opacity:1}
+  .feedback{min-height:82px;margin-top:18px;padding:14px 16px;border-radius:14px;background:#f7f9fb;color:var(--muted);font-size:18px;line-height:1.5}
+  .feedback strong{color:var(--ink)}
+  .feedback.good{background:#edf9f3;color:#275d43}.feedback.try{background:#fff4f1;color:#7a3028}
+  .actions{display:flex;justify-content:space-between;gap:12px;margin-top:16px;flex-wrap:wrap}
+  .btn{font:inherit;font-weight:700;border:0;border-radius:14px;padding:12px 18px;cursor:pointer}.primary{background:var(--accent);color:#fff}.secondary{background:#e8eef5;color:var(--ink)}
+  .btn:disabled{background:#cbd7e4;color:#6f8192;cursor:not-allowed}
+  .teach{background:var(--warn);border:2px solid #f0d56f;border-radius:16px;padding:14px 16px;margin-bottom:16px;line-height:1.5;font-size:17px}.teach b{color:#6f5700}
+  .finish{text-align:center;padding:18px}.finish h2{font-size:32px;margin:4px 0 12px}.finish p{font-size:20px;color:var(--muted);line-height:1.45}
+  .level-number{font-size:64px;font-weight:800;color:var(--accent);line-height:1;margin:6px 0}
+  @media(max-width:650px){.choices{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.status{justify-content:flex-start}.wrap{padding:14px}.card{padding:17px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>Equivalent Fractions & Simplest Form</h1>
+    <div class="status">
+      <div class="pill" id="levelLabel">Level 1 of 5</div>
+      <div class="pill" id="score">First try: 0 of 0</div>
+    </div>
+  </div>
+  <div class="level-track" id="levelTrack"></div>
+  <div class="progress"><div id="bar"></div></div>
+  <div class="teach" id="teach"><b>Remember:</b> Equivalent fractions keep the same value. Whatever you multiply or divide the numerator by, you must do to the denominator too.</div>
+  <main class="card" id="card"></main>
+</div>
+<script>
+const TOTAL_LEVELS = 5;
+const QUESTIONS_PER_LEVEL = 10;
+
+const levelSettings = [
+  {minDen:3,  maxDen:10, minFactor:2, maxFactor:3, maxStart:30},
+  {minDen:8,  maxDen:16, minFactor:3, maxFactor:4, maxStart:64},
+  {minDen:12, maxDen:24, minFactor:4, maxFactor:5, maxStart:120},
+  {minDen:16, maxDen:32, minFactor:5, maxFactor:7, maxStart:224},
+  {minDen:20, maxDen:40, minFactor:6, maxFactor:9, maxStart:360}
+];
+
+const blockedFractions = new Set(['4:8','6:9','5:10','8:12','9:12','12:16']);
+
+let level = 1;
+let questionIndex = 0;
+let levelFirstTry = 0;
+let completedLevelScores = [0,0,0,0,0];
+let firstTryStillPossible = true;
+let solved = false;
+let questions = [];
+
+const card = document.getElementById('card');
+const scoreEl = document.getElementById('score');
+const levelLabel = document.getElementById('levelLabel');
+const bar = document.getElementById('bar');
+const levelTrack = document.getElementById('levelTrack');
+
+function gcd(a,b){ while(b){ [a,b]=[b,a%b]; } return a; }
+function simp(n,d){ const g=gcd(n,d); return {n:n/g,d:d/g}; }
+function sameFrac(a,b){ return a.n*b.d===b.n*a.d; }
+function fracKey(f){ return `${f.n}:${f.d}`; }
+function isBlocked(f){ return blockedFractions.has(fracKey(f)); }
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function uniqueFractions(list){
+  const out=[];
+  for(const f of list){ if(!out.some(x=>x.n===f.n&&x.d===f.d)) out.push(f); }
+  return out;
+}
+function fractionHTML(n,d,cls=''){
+  return `<span class="frac ${cls}"><span class="num">${n}</span><span class="den">${d}</span></span>`;
+}
+function displayValue(v){
+  if(v.kind==='frac') return fractionHTML(v.n,v.d,'big');
+  return String(v.value);
+}
+function baseFraction(settings){
+  for(let tries=0;tries<200;tries++){
+    const d=rand(settings.minDen,settings.maxDen);
+    const n=rand(1,d-1);
+    if(gcd(n,d)===1 && !isBlocked({n,d})) return {n,d};
+  }
+  return {n:2,d:3};
+}
+function safeScaled(base,factor,settings){
+  return base.n*factor<=settings.maxStart && base.d*factor<=settings.maxStart;
+}
+function chooseFactor(settings,base){
+  const possible=[];
+  for(let k=settings.minFactor;k<=settings.maxFactor;k++) if(safeScaled(base,k,settings)) possible.push(k);
+  return possible.length?possible[rand(0,possible.length-1)]:settings.minFactor;
+}
+function makeFracDistractors(correct,base,settings){
+  const pool = [
+    {n:correct.n+1,d:correct.d},
+    {n:correct.n,d:correct.d+1},
+    {n:Math.max(1,correct.n-1),d:correct.d},
+    {n:correct.n+base.n,d:correct.d},
+    {n:correct.n,d:Math.max(2,correct.d-base.d)},
+    {n:base.d,d:base.n},
+    {n:base.n+1,d:base.d}
+  ].filter(f=>f.n>0&&f.d>0&&!sameFrac(f,correct)&&!isBlocked(f)&&f.n<=settings.maxStart&&f.d<=settings.maxStart);
+  const clean=uniqueFractions(pool);
+  while(clean.length<3){
+    const f={n:rand(1,Math.max(3,correct.n+3)),d:rand(2,Math.max(4,correct.d+3))};
+    if(!sameFrac(f,correct)&&!isBlocked(f)&&!clean.some(x=>x.n===f.n&&x.d===f.d)) clean.push(f);
+  }
+  return shuffle(clean).slice(0,3);
+}
+function buildOptions(correct,distractors){
+  const all=shuffle([correct,...distractors]);
+  return {options:all, correctIndex:all.findIndex(v=>JSON.stringify(v)===JSON.stringify(correct))};
+}
+
+function makeEquivalentChoice(settings){
+  const base=baseFraction(settings), factor=chooseFactor(settings,base);
+  const correct={kind:'frac',n:base.n*factor,d:base.d*factor};
+  const ds=makeFracDistractors(correct,base,settings).map(f=>({kind:'frac',...f}));
+  const built=buildOptions(correct,ds);
+  return {
+    type:'Equivalent fractions',
+    question:`Which fraction is equivalent to ${fractionHTML(base.n,base.d,'big')}?`,
+    ...built,
+    explain:`Multiply both parts by <strong>${factor}</strong>: ${fractionHTML(base.n,base.d)} becomes ${fractionHTML(correct.n,correct.d)}.`
+  };
+}
+
+function makeMissingNumber(settings){
+  const base=baseFraction(settings), factor=chooseFactor(settings,base);
+  const missingTop=Math.random()<0.5;
+  const top=base.n*factor, bottom=base.d*factor;
+  const answer=missingTop?top:bottom;
+  const correct={kind:'num',value:answer};
+  const nums=new Set();
+  const candidates=[answer-factor,answer+factor,answer+base.n,answer+base.d,Math.max(1,answer-1),answer+1,answer+2];
+  for(const x of candidates) if(x>0&&x!==answer) nums.add(x);
+  while(nums.size<3){const x=rand(Math.max(1,answer-6),answer+8);if(x!==answer)nums.add(x);}
+  const ds=shuffle([...nums]).slice(0,3).map(value=>({kind:'num',value}));
+  const built=buildOptions(correct,ds);
+  const left=fractionHTML(base.n,base.d,'big');
+  const right=missingTop?fractionHTML('?',bottom,'big'):fractionHTML(top,'?','big');
+  return {
+    type:'Equivalent fractions',
+    question:`Complete the equivalent fraction: ${left} = ${right}`,
+    ...built,
+    explain:`The scale factor is <strong>${factor}</strong>. Apply it to both parts, so the missing number is <strong>${answer}</strong>.`
+  };
+}
+
+function makeSimplest(settings){
+  const base=baseFraction(settings), factor=chooseFactor(settings,base);
+  const start={n:base.n*factor,d:base.d*factor};
+  if(isBlocked(start)) return makeSimplest(settings);
+  const correct={kind:'frac',n:base.n,d:base.d};
+  const common=gcd(start.n,start.d);
+  const properDivisors=[];
+  for(let d=2;d<common;d++) if(common%d===0) properDivisors.push(d);
+  const partial=properDivisors.length ? {n:start.n/properDivisors[0],d:start.d/properDivisors[0]} : {n:base.n+1,d:base.d+2};
+  const raw=[
+    {n:start.n,d:start.d},
+    {n:Math.max(1,base.n+1),d:base.d},
+    {n:base.n,d:base.d+1},
+    partial
+  ].filter(f=>Number.isInteger(f.n)&&Number.isInteger(f.d)&&!sameFrac(f,correct)&&!isBlocked(f));
+  const ds=uniqueFractions(raw).slice(0,3).map(f=>({kind:'frac',...f}));
+  while(ds.length<3){
+    const f={kind:'frac',n:rand(1,Math.max(3,base.n+3)),d:rand(Math.max(2,base.d-2),base.d+5)};
+    if(!sameFrac(f,correct)&&!isBlocked(f)&&!ds.some(x=>x.n===f.n&&x.d===f.d)) ds.push(f);
+  }
+  const built=buildOptions(correct,ds);
+  return {
+    type:'Simplest form',
+    question:`Write ${fractionHTML(start.n,start.d,'big')} in simplest form.`,
+    ...built,
+    explain:`Divide the numerator and denominator by <strong>${factor}</strong>. That gives ${fractionHTML(base.n,base.d)}. The new numerator and denominator have no common factor greater than 1.`
+  };
+}
+
+function makeAlreadySimple(settings){
+  const correctBase=baseFraction(settings);
+  const correct={kind:'frac',...correctBase};
+  const wrong=[];
+  while(wrong.length<3){
+    const b=baseFraction(settings), factor=chooseFactor(settings,b);
+    const f={n:b.n*factor,d:b.d*factor};
+    if(!isBlocked(f)&&gcd(f.n,f.d)>1&&!wrong.some(x=>x.n===f.n&&x.d===f.d)) wrong.push({kind:'frac',...f});
+  }
+  const built=buildOptions(correct,wrong);
+  return {
+    type:'Simplest form',
+    question:'Which fraction is already in simplest form?',
+    ...built,
+    explain:`${fractionHTML(correct.n,correct.d)} is already simplest because its numerator and denominator have no common factor greater than 1.`
+  };
+}
+
+function makeQuestionSet(lvl){
+  const s=levelSettings[lvl-1];
+  const makers=[makeEquivalentChoice,makeMissingNumber,makeSimplest,makeAlreadySimple,makeEquivalentChoice,makeSimplest,makeMissingNumber,makeEquivalentChoice,makeSimplest,makeAlreadySimple];
+  return makers.map(fn=>fn(s));
+}
+
+function updateLevelTrack(){
+  levelTrack.innerHTML='';
+  for(let n=1;n<=TOTAL_LEVELS;n++){
+    const d=document.createElement('div'); d.className='level-dot'+(n<level?' done':n===level?' current':''); levelTrack.appendChild(d);
+  }
+}
+
+function render(){
+  solved=false;
+  firstTryStillPossible=true;
+  const x=questions[questionIndex];
+  bar.style.width=(questionIndex/QUESTIONS_PER_LEVEL*100)+'%';
+  levelLabel.textContent=`Level ${level} of ${TOTAL_LEVELS}`;
+  scoreEl.textContent=`First try: ${levelFirstTry} of ${questionIndex}`;
+  updateLevelTrack();
+  card.innerHTML=`
+    <div class="tag">${x.type} • Question ${questionIndex+1} of ${QUESTIONS_PER_LEVEL}</div>
+    <div class="question">${x.question}</div>
+    <div class="choices">${x.options.map((v,n)=>`<button class="choice" data-n="${n}">${displayValue(v)}</button>`).join('')}</div>
+    <div class="feedback" id="fb">Choose an answer. If it is not right, you can try again.</div>
+    <div class="actions">
+      <button class="btn secondary" id="restart">Restart level</button>
+      <button class="btn primary" id="next" disabled>Next</button>
+    </div>`;
+  document.querySelectorAll('.choice').forEach(b=>b.addEventListener('click',()=>pick(Number(b.dataset.n))));
+  document.getElementById('next').addEventListener('click',next);
+  document.getElementById('restart').addEventListener('click',restartLevel);
+}
+
+function pick(n){
+  if(solved) return;
+  const x=questions[questionIndex];
+  const buttons=[...document.querySelectorAll('.choice')];
+  const fb=document.getElementById('fb');
+  if(n===x.correctIndex){
+    solved=true;
+    buttons[n].classList.add('correct');
+    buttons.forEach(b=>b.disabled=true);
+    if(firstTryStillPossible){levelFirstTry++;}
+    scoreEl.textContent=`First try: ${levelFirstTry} of ${questionIndex+1}`;
+    fb.className='feedback good';
+    fb.innerHTML=`<strong>Yes.</strong> ${x.explain}`;
+    document.getElementById('next').disabled=false;
+  }else{
+    firstTryStillPossible=false;
+    buttons[n].classList.add('wrong');
+    buttons[n].disabled=true;
+    fb.className='feedback try';
+    fb.innerHTML='<strong>Try again.</strong> Keep the value the same. Check what happened to the numerator and do the same to the denominator.';
+  }
+}
+
+function next(){
+  if(!solved) return;
+  questionIndex++;
+  if(questionIndex<QUESTIONS_PER_LEVEL){ render(); return; }
+  bar.style.width='100%';
+  completedLevelScores[level-1]=levelFirstTry;
+  if(level<TOTAL_LEVELS) showLevelComplete(); else showFinal();
+}
+
+function showLevelComplete(){
+  levelLabel.textContent=`Level ${level} of ${TOTAL_LEVELS}`;
+  scoreEl.textContent=`First try: ${levelFirstTry} of ${QUESTIONS_PER_LEVEL}`;
+  card.innerHTML=`<div class="finish">
+    <div class="level-number">${level}</div>
+    <h2>Level complete!</h2>
+    <p>You solved all 10 questions. You got <strong>${levelFirstTry} of 10</strong> right on your first try.</p>
+    <p>Level ${level+1} uses bigger numbers.</p>
+    <button class="btn primary" id="startNextLevel">Start Level ${level+1}</button>
+  </div>`;
+  document.getElementById('startNextLevel').addEventListener('click',()=>{
+    level++;
+    questionIndex=0;
+    levelFirstTry=0;
+    questions=makeQuestionSet(level);
+    render();
+  });
+}
+
+function showFinal(){
+  levelLabel.textContent='Level 5 of 5';
+  const grandTotal=completedLevelScores.reduce((a,b)=>a+b,0);
+  scoreEl.textContent=`First try total: ${grandTotal} of 50`;
+  updateLevelTrack();
+  [...levelTrack.children].forEach(d=>d.className='level-dot done');
+  card.innerHTML=`<div class="finish">
+    <div class="level-number">5</div>
+    <h2>All five levels complete!</h2>
+    <p>You solved <strong>50 fraction questions</strong>, from small-number practice to larger-number simplification.</p>
+    <p>Your first-try total was <strong>${grandTotal} of 50</strong>.</p>
+    <button class="btn primary" id="restartAll">Play again from Level 1</button>
+  </div>`;
+  document.getElementById('restartAll').addEventListener('click',restartAll);
+}
+
+function restartLevel(){
+  questionIndex=0;
+  levelFirstTry=0;
+  questions=makeQuestionSet(level);
+  render();
+}
+function restartAll(){
+  level=1; questionIndex=0; levelFirstTry=0; completedLevelScores=[0,0,0,0,0];
+  questions=makeQuestionSet(level);
+  render();
+}
+
+questions=makeQuestionSet(level);
+render();
+</script>
+</body>
+</html>
