@@ -137,16 +137,16 @@
       "url": "https://bajoseph01.github.io/gr4-division/",
       "sourceFolder": "Gr4_Division",
       "repositoryUrl": "https://github.com/bajoseph01/gr4-division",
-      "version": "Current",
-      "learningObjective": "Understand long division before moving to short division.",
-      "learnerAction": "Learners work through each division stage in order and see how one state creates the next.",
-      "evidence": "Completed method steps, quotients and remainders.",
+      "version": "V2",
+      "learningObjective": "Build long division step by step, starting with two-digit problems without remainders.",
+      "learnerAction": "Learners enter each quotient, product, subtraction result and brought-down digit in the coloured working, then progress through five practice levels.",
+      "evidence": "Completed division working, correct quotients and remainders, and progression from two-digit exact to three-digit problems.",
       "sessionLength": "5–12 min",
       "input": ["Touch", "Mouse", "Keyboard"],
       "visual": "division",
       "learningScore": null,
-      "lastChecked": "2026-08-22",
-      "note": "Live GitHub Pages build."
+      "lastChecked": "2026-11-07",
+      "note": "V2: five incremental practice levels, direct answer boxes, short division and scratchpad. Starts at 48 ÷ 2."
     },
     {
       "id": "turbo-tables-v4",
