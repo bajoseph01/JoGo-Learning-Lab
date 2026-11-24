@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#201936">
+<title>Nik's BRICKS | A maths adventure</title>
+<style>
+:root{color-scheme:light;--ink:#231b35;--muted:#645775;--purple:#542f94;--orange:#ffb667;--cream:#fff9ec;--line:#ded3e6;--surface:#f4eefb;--green:#186047}
+*{box-sizing:border-box}
+body{margin:0;background:#f4eefb;color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px}
+button,select,input{font:inherit;color:inherit} button{cursor:pointer;touch-action:manipulation} button:disabled{cursor:default} [hidden]{display:none!important}
+button:focus-visible,select:focus-visible,input:focus-visible,[tabindex="-1"]:focus-visible{outline:3px solid #8762d8;outline-offset:3px}
+.top{background:#201936;color:#fff6e3;border-bottom:4px solid #513b6a}
+.top-in,main{width:min(1120px,calc(100% - 48px));margin-inline:auto}
+.top-in{display:flex;justify-content:space-between;align-items:center;min-height:70px;gap:12px}
+.brand,.top-actions,.chip{display:flex;align-items:center;gap:10px}
+.brand{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:clamp(18px,2.7vw,24px);font-weight:900;letter-spacing:-.06em}
+.logo,.gem{width:22px;height:22px;background:#ffad60;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:inset -7px -5px #dc6a54,inset 5px 6px #ffdf98;flex:none}
+.gem{width:15px;height:15px}
+.chip,.teacher{min-height:44px;padding:7px 12px;border:1px solid #6f5b89;border-radius:9px;background:#332646;color:#fff6e3;font-weight:750}
+.teacher{background:transparent}
+main{padding:24px 0 32px}.layout{display:grid;grid-template-columns:minmax(290px,.85fr) minmax(390px,1.15fr);gap:19px;align-items:stretch}
+.world{position:relative;overflow:hidden;background:#26203e;color:#fff7e7;min-height:510px;border:3px solid #201936;border-radius:16px;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;padding:25px}
+#landscape{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated;z-index:-2}
+.world:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(25,18,42,.58),transparent 57%,rgba(23,17,36,.88) 87%)}
+.eyebrow,.tag,.progress-label,.mode-type{font:750 .83rem/1.25 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.075em;text-transform:uppercase}
+.eyebrow{color:#ffd290;margin:0 0 7px}
+h1,h2,h3,p{margin-top:0} h1{font-size:clamp(2.3rem,5vw,4rem);line-height:.94;letter-spacing:-.055em;margin-bottom:10px;text-shadow:3px 4px #281b38;max-width:7ch}
+.world-copy{max-width:23ch;line-height:1.35;margin:0;color:#fff0d8}
+.world-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:800;font-size:.87rem}
+.world-name{color:#ffdb9e}
+.pack{display:flex;gap:6px}.pack i{display:block;width:17px;height:17px;background:#33274e;border:2px solid #8370a2;border-radius:3px}.pack i.filled{background:#ffad60;border-color:#ffdd95;box-shadow:inset -3px -3px #d66c54}
+.board{background:var(--cream);border:2px solid #352746;border-radius:16px;box-shadow:0 5px #d9cbe7;padding:21px 22px;min-width:0}
+.board-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:13px}
+.tag{color:#633c93;background:#eee1f7;padding:6px 8px;border-radius:5px}.progress-label{letter-spacing:.01em;color:#645575}
+h2{font-size:clamp(1.45rem,3vw,2rem);line-height:1.09;margin-bottom:6px;letter-spacing:-.034em}
+.instruction{color:var(--muted);margin-bottom:12px;min-height:22px;line-height:1.35}
+.model{min-height:63px;background:#eee4f7;border:1px solid #ded0ec;border-radius:10px;display:flex;justify-content:center;align-items:center;gap:8px;padding:9px;margin-bottom:12px;flex-wrap:wrap}
+.stone{display:grid;place-items:center;min-width:52px;min-height:39px;padding:3px 7px;font-weight:900;color:#fff;background:#56398c;border-radius:6px;box-shadow:inset 0 -4px #37245c}
+.stone.empty{background:transparent;border:2px dashed #9c80c5;color:#61438a;box-shadow:none}
+.stone.done{background:#28684f;box-shadow:inset 0 -4px #194934}
+.blocks{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:3px;max-width:100%}
+.blocks i,.loose i{display:block;width:clamp(9px,1.6vw,16px);aspect-ratio:1;background:#8055bf;box-shadow:inset -2px -2px #59388c;border-radius:2px}
+.loose{display:flex;flex-wrap:wrap;align-items:center;gap:3px}.loose i{background:#e39158;box-shadow:inset -2px -2px #a95735}
+.model small{font-size:.88rem;color:#523e69;text-align:center;max-width:100%}.equation{font-weight:900;font-size:1.78rem;letter-spacing:.025em}
+.choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.choice,.key,.num-entry{min-height:46px;border:1.5px solid #ad99c3;border-radius:7px;background:#fffdf6;font-weight:850;font-size:1.13rem;box-shadow:0 2px #e7dbed}
+.choice[aria-pressed="true"]{background:#e4d6fa;border-color:#634094;color:#3f216c;box-shadow:inset 0 -3px #c4a9ea}
+.choice.good{background:#d9f0e2;color:#13513b;border-color:#3c8967}
+.choice.bad{background:#f8e1d9;color:#822d27;border-color:#cc7665}
+.choice:disabled,.key:disabled{opacity:.72}
+.keypad{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.key{min-height:44px}.num-entry{width:96px;min-height:44px;text-align:center;margin:0 0 0 4px;box-shadow:none}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.primary,.secondary{min-height:46px;padding:8px 15px;border-radius:8px;border:1.5px solid #472971;font-weight:850}
+.primary{background:#55338b;color:white;box-shadow:0 3px #372153}.primary:disabled{opacity:.57}.secondary{background:transparent;color:#4e2f78;border-color:#ad99c3}
+.feedback{min-height:43px;margin:11px 0 0;font-size:.94rem;line-height:1.35;color:#594771}.feedback.good{color:var(--green);font-weight:700}.feedback.bad{color:#842d27;font-weight:700}
+.track{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:18px}
+.mission{display:flex;text-align:left;align-items:center;gap:11px;padding:11px 12px;min-height:76px;background:#fff9ec;border:1.5px solid #b8a5cc;border-radius:11px;box-shadow:0 3px #ded0ec}
+.mission[aria-pressed="true"]{border:2px solid #664198;background:#ebddfa;box-shadow:0 3px #c9b1ea}
+.mission-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:8px;flex:none;font:900 22px ui-monospace,monospace;color:#402d66;background:#e1d1f9}
+.mission:nth-child(2) .mission-icon{color:#14533b;background:#ceead9}.mission:nth-child(3) .mission-icon{color:#763629;background:#fae0c1}
+.mode-type{display:block;color:#665574;font-size:.73rem;letter-spacing:.03em}.mission strong{display:block;line-height:1.18}
+.dialog{position:fixed;inset:0;z-index:4;display:grid;place-items:center;padding:15px;background:#201936b8}
+.dialog-inner{max-width:490px;width:100%;max-height:92vh;overflow:auto;background:var(--cream);border:2px solid #40285e;padding:22px;border-radius:14px;box-shadow:0 5px #39254f}
+.dialog-inner label{display:block;margin:13px 0;font-weight:800}.dialog-inner select{display:block;width:100%;margin-top:5px;border:1px solid #9377b7;border-radius:7px;background:#fffdf7;padding:8px;min-height:44px}
+.dialog-inner p,.dialog-inner li{line-height:1.4}.dialog-inner ul{padding-left:20px;margin-bottom:12px}.dialog-inner h3{margin:14px 0 5px;font-size:1rem}
+.complete{padding-block:22px}.complete .model{font-size:1.25rem;color:#4e2b7e;font-weight:850}
+@media(max-width:780px){.top-in,main{width:calc(100% - 30px)}.layout{grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr);gap:12px}.world{padding:17px}.board{padding:16px}.world-foot{flex-wrap:wrap}}
+@media(max-width:620px){.top-in,main{width:calc(100% - 22px)}.top-in{min-height:60px}.layout{grid-template-columns:1fr}.world{min-height:220px}.world:before{background:linear-gradient(90deg,#1e152ecc 0%,transparent 90%)}#landscape{object-position:50% 63%}.track{gap:6px}.mission{padding:8px 4px;flex-direction:column;text-align:center;gap:5px}.mission-icon{width:33px;height:33px}.mission strong{font-size:.86rem}.mode-type{font-size:.65rem}.teacher,.chip{padding:5px 8px}.top-actions,.brand{gap:6px}main{padding-top:12px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <div class="brand"><span class="logo" aria-hidden="true"></span>Nik's BRICKS</div>
+  <div class="top-actions"><span class="chip" role="img" id="total-gems" aria-label="0 total crystals"><span class="gem" aria-hidden="true"></span><span id="total">0</span></span><button class="teacher" id="teacher" type="button">Teacher</button></div>
+</div></header>
+<main>
+  <div class="layout">
+    <section class="world" aria-label="Expedition map">
+      <canvas id="landscape" width="240" height="270" aria-hidden="true"></canvas>
+      <div><p class="eyebrow">Maths expedition</p><h1>Nik's BRICKS</h1><p class="world-copy" id="world-copy"></p></div>
+      <div class="world-foot"><span class="world-name" id="world-name"></span><span class="pack" role="img" id="pack"></span></div>
+    </section>
+    <section class="board" aria-label="Puzzle">
+      <div class="board-top"><span class="tag" id="skill"></span><span class="progress-label" id="progress"></span></div>
+      <div id="puzzle"></div>
+      <p class="feedback" id="feedback" aria-live="polite" aria-atomic="true"></p>
+    </section>
+  </div>
+  <nav class="track" aria-label="Choose a mission">
+    <button class="mission" data-mode="bridge" aria-pressed="true"><span class="mission-icon" aria-hidden="true">▤</span><span><span class="mode-type">Multiples</span><strong>Bridge Run</strong></span></button>
+    <button class="mission" data-mode="mine" aria-pressed="false"><span class="mission-icon" aria-hidden="true">▦</span><span><span class="mode-type">Factors</span><strong>Crystal Mine</strong></span></button>
+    <button class="mission" data-mode="forge" aria-pressed="false"><span class="mission-icon" aria-hidden="true">×</span><span><span class="mode-type">Times tables</span><strong>Table Forge</strong></span></button>
+  </nav>
+</main>
+<div class="dialog" id="settings" hidden>
+  <section class="dialog-inner" role="dialog" aria-modal="true" aria-labelledby="teacher-heading">
+    <h2 id="teacher-heading">Teacher controls</h2>
+    <label>Difficulty<select id="level">
+      <option value="starter">Starter · 2, 5 and 10</option>
+      <option value="builder">Builder · 2–6 and 10</option>
+      <option value="explorer">Explorer · up to 12 × 12</option>
+    </select></label>
+    <label>Practise one table in Table Forge<select id="table"><option value="0">Mix tables for this difficulty</option></select></label>
+    <p><strong id="teacher-total"></strong> earned on this browser.</p>
+    <h3>Try one number across all three missions</h3>
+    <p>Build 12 as 3 rows of 4. Ask “Is 12 a multiple of 4?” Then ask “Is 4 a factor of 12?” Finish with 3 × 4.</p>
+    <h3>German maths words</h3>
+    <ul><li>Multiple — <span lang="de">Vielfaches</span></li><li>Factor — <span lang="de">Faktor</span></li><li>Times tables — <span lang="de">Einmaleins</span></li></ul>
+    <div class="controls"><button class="primary" id="apply">Done</button><button class="secondary" id="cancel">Cancel</button></div>
+  </section>
+</div>
+<script>
+'use strict';
+const byId = id => document.getElementById(id);
+const puzzle = byId('puzzle');
+const feedback = byId('feedback');
+const modes = {
+  bridge: { name:'Bridge Run', skill:'Multiples', copy:'Find the numbers that belong and build a bridge across the ravine.' },
+  mine: { name:'Crystal Mine', skill:'Factors', copy:'Split crystals into equal rows to find which numbers fit.' },
+  forge: { name:'Table Forge', skill:'Times tables', copy:'Use your times tables to power the forge.' }
+};
+const tables = {
+  starter:[2,5,10],
+  builder:[2,3,4,5,6,10],
+  explorer:[1,2,3,4,5,6,7,8,9,10,11,12]
+};
+const factorTargets = {
+  starter:[6,8,10,12,15,20],
+  builder:[12,16,18,24,25,30,36],
+  explorer:[28,32,36,42,48,54,56,60,63,72,81,84,96,108,120,132,144]
+};
+const key = 'blockbound-progress-v1';
+const roundSize = 5;
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(key)) || {}; } catch {}
+let level = Object.hasOwn(tables,saved.level) ? saved.level : 'starter';
+let focusTable = Number.isInteger(saved.table) && saved.table >= 1 && saved.table <= 12 ? saved.table : 0;
+let total = Number.isSafeInteger(saved.total) && saved.total >= 0 ? saved.total : 0;
+let mode = 'bridge';
+let questions = [], index = 0, selection = [], lastTest = 0, bridgePlaced = 0;
+let completed = false, hinted = false, retried = false, finished = false, independent = 0;
+let settingsFocus;
+const missions = Array.from(document.querySelectorAll('.mission'));
+const tableSelect = byId('table');
+for(let n=1;n<=12;n++) tableSelect.add(new Option(n+' times table',n));
+
+function persist(){
+  try { localStorage.setItem(key,JSON.stringify({level,table:focusTable,total})); } catch {}
+}
+function shuffle(items){
+  const result = items.slice();
+  for(let i=result.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [result[i],result[j]] = [result[j],result[i]];
+  }
+  return result;
+}
+function range(n){ return Array.from({length:n},(_,i)=>i+1); }
+function makeRound(){
+  if(mode==='bridge'){
+    const offsets = level==='starter' ? [1,2,3] : [1,2,3,4,5,6,7,8];
+    const pool = tables[level].flatMap(n=>offsets.map(start=>({n,start})));
+    if(level==='starter'){
+      const first = shuffle(tables[level]).map(n=>({n,start:1}));
+      return first.concat(shuffle(pool.filter(q=>q.start>1)).slice(0,roundSize-first.length));
+    }
+    return shuffle(pool).slice(0,roundSize);
+  }
+  if(mode==='mine') return shuffle(factorTargets[level]).slice(0,roundSize).map(n=>({n}));
+  const max = focusTable || level==='explorer' ? 12 : level==='starter' ? 6 : 10;
+  const pool = (focusTable ? [focusTable] : tables[level]).flatMap(n=>range(max).map(m=>({n,m})));
+  return shuffle(pool).slice(0,roundSize);
+}
+function begin(newMode, moveFocus=false){
+  mode = newMode;
+  questions = makeRound();
+  index = 0;
+  independent = 0;
+  finished = false;
+  missions.forEach(button=>button.setAttribute('aria-pressed',button.dataset.mode===mode));
+  byId('skill').textContent = modes[mode].skill;
+  byId('world-name').textContent = modes[mode].name;
+  byId('world-copy').textContent = modes[mode].copy;
+  showQuestion(moveFocus);
+}
+function updateProgress(){
+  byId('total').textContent = total;
+  byId('total-gems').setAttribute('aria-label',total+' total crystals');
+  byId('progress').textContent = finished ? 'Mission complete' : 'Puzzle '+(index+1)+' / '+roundSize;
+  const earned = finished ? roundSize : index+Number(completed);
+  byId('pack').setAttribute('aria-label',earned+' of '+roundSize+' mission crystals');
+  paintWorld(earned);
+  byId('pack').innerHTML = range(roundSize).map(i=>'<i aria-hidden="true" class="'+(i<=earned?'filled':'')+'"></i>').join('');
+}
+function say(message,kind=''){
+  feedback.className = 'feedback '+kind;
+  feedback.textContent = message;
+}
+function showQuestion(moveFocus){
+  selection=[]; lastTest=0; bridgePlaced=0; completed=false; hinted=false; retried=false;
+  say('');
+  updateProgress();
+  const q = questions[index];
+  let heading, instruction, content;
+  if(mode==='bridge'){
+    heading = 'Cross the '+q.n+'s bridge';
+    instruction = 'Tap the next two multiples of '+q.n+' in order.';
+    const a = (q.start+2)*q.n, b = a+q.n;
+    const decoys = shuffle(range(Math.max(b+4,10)).filter(x=>x>=Math.max(1,a-4)&&x<=b+4&&x!==a&&x!==b));
+    content = '<div class="model" id="bridge-model"></div><div class="choices">'+shuffle([a,b,...decoys.slice(0,2)]).map(n=>choice(n)).join('')+'</div>';
+  } else if(mode==='mine'){
+    heading = 'Find factors of '+q.n;
+    instruction = 'Choose all the row sizes below that leave zero crystals left over.';
+    q.options = mineOptions(q.n);
+    content = '<div class="model" id="mine-model"><small>'+q.n+' crystals to split into equal rows</small></div><div class="choices" aria-label="Row sizes">'+q.options.map(n=>choice(n,true)).join('')+'</div>';
+  } else {
+    heading = 'Power the forge';
+    instruction = 'Work out the product. Enter your answer.';
+    content = '<div class="model equation"><label for="answer">'+q.n+' × '+q.m+' =</label><input id="answer" class="num-entry" inputmode="none" autocomplete="off" maxlength="3" aria-label="Product"></div><div class="keypad" aria-label="Number pad">'+[1,2,3,4,5,6,7,8,9,0].map(n=>'<button type="button" class="key" data-digit="'+n+'">'+n+'</button>').join('')+'<button class="key" data-digit="del" aria-label="Delete last digit">⌫</button><button class="key" data-digit="clear" aria-label="Clear answer">C</button></div>';
+  }
+  puzzle.innerHTML = '<h2 tabindex="-1" id="puzzle-heading">'+heading+'</h2><p class="instruction">'+instruction+'</p>'+content+'<div class="controls">'+(mode==='bridge'?'':'<button class="primary" id="check">Check</button>')+'<button class="secondary" id="hint">'+(mode==='mine'?'Show rows':'Hint')+'</button><button class="primary" id="next" hidden>Next puzzle</button></div>';
+  if(mode==='bridge') renderBridge();
+  if(moveFocus) byId('puzzle-heading').focus();
+}
+function choice(n,toggle=false){
+  return '<button class="choice" type="button" data-choice="'+n+'"'+(toggle?' aria-pressed="false"':'')+'>'+n+'</button>';
+}
+function renderBridge(){
+  const {n,start} = questions[index];
+  byId('bridge-model').innerHTML = range(4).map(i=>{
+    const position = i-1;
+    const visible = position<2+bridgePlaced;
+    return '<span class="stone '+(visible?(position>=2?'done':''):'empty')+'">'+(visible?(start+position)*n:'?')+'</span>';
+  }).join('');
+}
+function mineOptions(n){
+  const smaller = range(Math.floor(Math.sqrt(n))).filter(f=>n%f===0);
+  const correct = [...new Set([...smaller,...smaller.map(f=>n/f)])];
+  const priority = [...new Set([1,n,...smaller.filter(f=>f>1).slice(0,2).flatMap(f=>[f,n/f])])];
+  const targets = priority.slice(0,6);
+  if(targets.length<4) targets.push(...shuffle(correct.filter(f=>!targets.includes(f))).slice(0,4-targets.length));
+  const decoys = shuffle(range(Math.min(18,n)).filter(x=>n%x!==0));
+  return [...targets,...decoys.slice(0,8-targets.length)].sort((a,b)=>a-b);
+}
+function blockArray(rows,cols,loose=0){
+  // Use a count for very wide rows so the model stays legible on small screens.
+  if(rows>12||cols>12||rows*cols>72) return '';
+  return (rows&&cols ? '<span aria-hidden="true" class="blocks" style="--cols:'+cols+'">'+ '<i></i>'.repeat(rows*cols)+'</span>' : '')+
+    (loose&&loose<=12 ? '<span aria-hidden="true" class="loose">'+'<i></i>'.repeat(loose)+'</span>' : '');
+}
+function renderMine(size){
+  const n = questions[index].n;
+  const rows = Math.floor(n/size), loose = n%size;
+  byId('mine-model').innerHTML = blockArray(rows,size,loose)+'<small>'+rows+' '+(rows===1?'row':'rows')+' of '+size+' · '+loose+' left over</small>';
+}
+function respondToChoice(button){
+  const value = Number(button.dataset.choice);
+  const q = questions[index];
+  if(mode==='bridge'){
+    const expected = (q.start+2+bridgePlaced)*q.n;
+    if(value!==expected){
+      retried=true;
+      button.classList.add('bad');
+      say('Add '+q.n+' to '+(expected-q.n)+' to find the next stone.','bad');
+      return;
+    }
+    button.classList.remove('bad');
+    button.classList.add('good');
+    bridgePlaced++;
+    renderBridge();
+    if(bridgePlaced===2) win('Bridge built! Each stone is '+q.n+' more than the last.');
+    else {
+      button.disabled=true;
+      say('That fits. Jump forward by '+q.n+' once more.','good');
+    }
+  } else {
+    selection = selection.includes(value) ? selection.filter(x=>x!==value) : selection.concat(value);
+    lastTest=value;
+    button.setAttribute('aria-pressed',selection.includes(value));
+    puzzle.querySelectorAll('.choice').forEach(item=>item.classList.remove('bad','good'));
+    if(hinted) renderMine(value);
+    say(selection.includes(value)?value+' selected.':value+' removed.');
+  }
+}
+function check(){
+  const q = questions[index];
+  if(mode==='mine'){
+    const good = q.options.filter(n=>q.n%n===0);
+    const extra = selection.find(n=>q.n%n!==0);
+    const missing = good.some(n=>!selection.includes(n));
+    if(!extra&&!missing){
+      win('Crystal found! Each size you picked divides '+q.n+' exactly.');
+      return;
+    }
+    retried=true;
+    if(extra){
+      renderMine(extra);
+      puzzle.querySelector('[data-choice="'+extra+'"]').classList.add('bad');
+      say(extra+' leaves '+q.n%extra+' left over. Tap '+extra+' again to remove it.','bad');
+    } else {
+      say('All your picks fit. There '+(good.length-selection.length===1?'is one more row size':'are more row sizes')+' to find.','bad');
+    }
+  } else {
+    const entry = byId('answer');
+    if(!entry.value.trim()){ say('Enter a number first.'); entry.focus(); return; }
+    if(/^\d+$/.test(entry.value) && Number(entry.value)===q.n*q.m){
+      win('Forge powered! '+q.n+' × '+q.m+' = '+q.n*q.m+'.');
+    } else {
+      retried=true;
+      say('Try again. Think of '+q.n+' equal groups of '+q.m+'.','bad');
+      entry.value='';
+      entry.focus();
+    }
+  }
+}
+function hint(){
+  const q = questions[index];
+  hinted = true;
+  if(mode==='bridge'){
+    say('Start at '+((q.start+1+bridgePlaced)*q.n)+'. Count on '+q.n+' more.');
+  } else if(mode==='mine'){
+    const test = lastTest || q.options.find(n=>n>1) || 1;
+    renderMine(test);
+    say('Try another row size to see what happens. A factor leaves zero crystals.');
+  } else {
+    const groups = Array.from({length:q.n},()=>q.m).join(' + ');
+    say('Add '+groups+'.');
+  }
+}
+function win(message){
+  completed=true;
+  if(!hinted&&!retried) independent++;
+  total++;
+  persist();
+  updateProgress();
+  puzzle.querySelectorAll('.choice,.key,#answer').forEach(control=>control.disabled=true);
+  byId('hint').hidden=true;
+  if(byId('check')) byId('check').hidden=true;
+  const next=byId('next');
+  next.hidden=false;
+  if(index+1===roundSize) next.textContent='Finish mission';
+  say(message,'good');
+  next.focus();
+}
+function advance(){
+  if(index+1<roundSize){
+    index++;
+    showQuestion(true);
+    return;
+  }
+  finished=true;
+  updateProgress();
+  say('');
+  puzzle.innerHTML = '<div class="complete"><h2 id="finish" tabindex="-1">Mission complete!</h2><div class="model">+'+roundSize+' crystals</div><p>You solved '+independent+' of '+roundSize+' puzzles on your first try without hints.</p><button class="primary" id="again">Play again</button></div>';
+  byId('finish').focus();
+}
+puzzle.addEventListener('click',event=>{
+  const target = event.target.closest('button');
+  if(!target) return;
+  if(target.id==='again') begin(mode,true);
+  if(target.id==='next' && completed) advance();
+  if(completed) return;
+  if(target.dataset.choice) respondToChoice(target);
+  if(target.id==='check') check();
+  if(target.id==='hint') hint();
+  if(target.dataset.digit){
+    const entry=byId('answer'), digit=target.dataset.digit;
+    if(digit==='del') entry.value=entry.value.slice(0,-1);
+    else if(digit==='clear') entry.value='';
+    else if(entry.value.length<3) entry.value+=digit;
+  }
+});
+puzzle.addEventListener('input',event=>{
+  if(event.target.id==='answer') event.target.value=event.target.value.replace(/[^0-9]/g,'').slice(0,3);
+});
+puzzle.addEventListener('keydown',event=>{
+  if(event.target.id==='answer'&&event.key==='Enter'&&!completed){ event.preventDefault(); check(); }
+});
+missions.forEach(button=>button.addEventListener('click',()=>{
+  if(button.dataset.mode!==mode) begin(button.dataset.mode,true);
+}));
+const settings=byId('settings');
+byId('teacher').addEventListener('click',()=>{
+  settingsFocus=document.activeElement;
+  byId('level').value=level;
+  tableSelect.value=focusTable;
+  byId('teacher-total').textContent=total+' '+(total===1?'crystal':'crystals');
+  settings.hidden=false;
+  byId('level').focus();
+});
+function closeSettings(){ settings.hidden=true; settingsFocus.focus(); }
+byId('cancel').addEventListener('click',closeSettings);
+byId('apply').addEventListener('click',()=>{
+  const newLevel=byId('level').value, newTable=Number(tableSelect.value);
+  const changed=newLevel!==level||newTable!==focusTable;
+  const tableChanged=newTable!==focusTable;
+  level=newLevel;
+  focusTable=newTable;
+  persist();
+  closeSettings();
+  if(changed) begin(tableChanged&&newTable?'forge':mode,true);
+});
+settings.addEventListener('keydown',event=>{
+  if(event.key==='Escape') closeSettings();
+  if(event.key==='Tab'){
+    const items=settings.querySelectorAll('button,select');
+    const first=items[0], last=items[items.length-1];
+    if(event.shiftKey&&document.activeElement===first){ event.preventDefault(); last.focus(); }
+    if(!event.shiftKey&&document.activeElement===last){ event.preventDefault(); first.focus(); }
+  }
+});
+settings.addEventListener('click',event=>{ if(event.target===settings) closeSettings(); });
+
+function paintWorld(earned){
+  const canvas=byId('landscape');
+  const context=canvas.getContext('2d');
+  if(!context) return;
+  const palettes={
+    bridge:['#302547','#50345c','#a95965','#ffb471','#67435e','#463355','#302441','#f9ae67','#8b5abb'],
+    mine:['#24203e','#382b5c','#5e448d','#da90cf','#594276','#423257','#2e2546','#d6a6ff','#8cf0d2'],
+    forge:['#32203d','#522d56','#aa5b66','#ffb26c','#73435a','#48304e','#2f213e','#ffd278','#ec7958']
+  };
+  const [top,sky,horizon,sun,far,near,rock,light,crystal]=palettes[mode];
+  const rect=(x,y,w,h,colour)=>{ context.fillStyle=colour; context.fillRect(x,y,w,h); };
+  let seed=93;
+  const rand=()=>{ seed=(Math.imul(seed,1664525)+1013904223)>>>0; return seed/4294967296; };
+  rect(0,0,240,270,top);
+  rect(0,74,240,96,sky);
+  rect(0,112,240,66,horizon);
+  for(let i=0;i<67;i++) rect(Math.floor(rand()*240),Math.floor(rand()*150),rand()>.82?2:1,1,i%4?sky:light);
+  // A stepped sun and two ridgelines give the map an original pixel-art silhouette.
+  for(let i=0;i<5;i++) rect(155-i*4,94+i*5,31+i*8,42-i*3,sun);
+  rect(133,130,74,4,horizon);
+  rect(136,141,70,3,horizon);
+  for(const [position,shade] of [[144,far],[177,near]]){
+    let y=position;
+    for(let x=0;x<240;x+=8){
+      y=Math.max(position-20,Math.min(position+23,y+(Math.floor(rand()*3)-1)*7));
+      rect(x,y,8,270-y,shade);
+    }
+  }
+  function pillar(x,y,w){
+    rect(x,y,w,270-y,rock);
+    rect(x,y,w,4,light);
+    rect(x,y+4,w,5,far);
+    for(let j=y+12;j<270;j+=8){
+      for(let i=x;i<x+w;i+=8){
+        const shade=rand();
+        if(shade>.52) rect(i,j,Math.min(7,x+w-i),5,shade>.83?far:near);
+        if(shade>.93) rect(i+1,j+1,3,1,light);
+      }
+    }
+  }
+  pillar(0,173,36);pillar(32,192,37);pillar(68,214,27);pillar(153,210,27);pillar(177,191,22);pillar(198,170,42);
+  if(mode==='bridge'){
+    for(let i=0;i<3+earned;i++){
+      const x=63+15*i,y=189+Math.floor(12*Math.sin(i*Math.PI/7));
+      rect(x,y,13,8,rock);rect(x,y,13,3,light);rect(x+8,y+5,5,5,near);
+    }
+  } else {
+    rect(88,239,74,14,far);rect(93,238,64,3,light);
+    for(let i=0;i<earned;i++){
+      const x=95+13*i;
+      rect(x,227,7,10,crystal);rect(x+2,224,3,4,crystal);rect(x+4,228,2,5,light);
+    }
+  }
+  for(const [x,y,scale] of [[27,172,2],[200,169,2],[114,230,2],[150,213,1],[178,190,1]]){
+    rect(x-3*scale,y-7*scale,6*scale,7*scale,crystal);
+    rect(x-scale,y-10*scale,2*scale,5*scale,crystal);
+    rect(x+scale,y-5*scale,2*scale,5*scale,light);
+  }
+  rect(205,148,3,22,rock);rect(208,149,15,10,crystal);rect(218,157,6,2,light);
+}
+begin(mode);
+</script>
+</body>
+</html>
