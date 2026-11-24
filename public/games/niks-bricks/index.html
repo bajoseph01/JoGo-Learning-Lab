@@ -21,14 +21,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex="-1"]:fo
 .chip,.teacher{min-height:44px;padding:7px 12px;border:1px solid #6f5b89;border-radius:9px;background:#332646;color:#fff6e3;font-weight:750}
 .teacher{background:transparent}
 main{padding:24px 0 32px}.layout{display:grid;grid-template-columns:minmax(290px,.85fr) minmax(390px,1.15fr);gap:19px;align-items:stretch}
-.world{position:relative;overflow:hidden;background:#26203e;color:#fff7e7;min-height:510px;border:3px solid #201936;border-radius:16px;isolation:isolate;display:flex;flex-direction:column;justify-content:space-between;padding:25px}
-#landscape{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;image-rendering:pixelated;z-index:-2}
-.world:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(25,18,42,.58),transparent 57%,rgba(23,17,36,.88) 87%)}
+.world{overflow:hidden;background:#26203e;color:#fff7e7;min-width:0;border:3px solid #201936;border-radius:16px;display:flex;flex-direction:column;justify-content:center;gap:17px;padding:19px}
+#landscape{display:block;width:100%;height:auto;aspect-ratio:384/224;background:#3a2c51;image-rendering:pixelated;border:2px solid #625174;border-radius:8px}
 .eyebrow,.tag,.progress-label,.mode-type{font:750 .83rem/1.25 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.075em;text-transform:uppercase}
 .eyebrow{color:#ffd290;margin:0 0 7px}
-h1,h2,h3,p{margin-top:0} h1{font-size:clamp(2.3rem,5vw,4rem);line-height:.94;letter-spacing:-.055em;margin-bottom:10px;text-shadow:3px 4px #281b38;max-width:7ch}
-.world-copy{max-width:23ch;line-height:1.35;margin:0;color:#fff0d8}
-.world-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:800;font-size:.87rem}
+h1,h2,h3,p{margin-top:0} h1{font-size:clamp(1.95rem,4vw,3.45rem);line-height:.98;letter-spacing:-.055em;margin-bottom:8px;text-shadow:3px 4px #281b38}
+.world-copy{max-width:36ch;line-height:1.35;margin:0;color:#fff0d8}
+.world-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:800;font-size:.87rem;min-height:24px}
 .world-name{color:#ffdb9e}
 .pack{display:flex;gap:6px}.pack i{display:block;width:17px;height:17px;background:#33274e;border:2px solid #8370a2;border-radius:3px}.pack i.filled{background:#ffad60;border-color:#ffdd95;box-shadow:inset -3px -3px #d66c54}
 .board{background:var(--cream);border:2px solid #352746;border-radius:16px;box-shadow:0 5px #d9cbe7;padding:21px 22px;min-width:0}
@@ -70,7 +69,7 @@ h2{font-size:clamp(1.45rem,3vw,2rem);line-height:1.09;margin-bottom:6px;letter-s
 .dialog-inner p,.dialog-inner li{line-height:1.4}.dialog-inner ul{padding-left:20px;margin-bottom:12px}.dialog-inner h3{margin:14px 0 5px;font-size:1rem}
 .complete{padding-block:22px}.complete .model{font-size:1.25rem;color:#4e2b7e;font-weight:850}
 @media(max-width:780px){.top-in,main{width:calc(100% - 30px)}.layout{grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr);gap:12px}.world{padding:17px}.board{padding:16px}.world-foot{flex-wrap:wrap}}
-@media(max-width:620px){.top-in,main{width:calc(100% - 22px)}.top-in{min-height:60px}.layout{grid-template-columns:1fr}.world{min-height:220px}.world:before{background:linear-gradient(90deg,#1e152ecc 0%,transparent 90%)}#landscape{object-position:50% 63%}.track{gap:6px}.mission{padding:8px 4px;flex-direction:column;text-align:center;gap:5px}.mission-icon{width:33px;height:33px}.mission strong{font-size:.86rem}.mode-type{font-size:.65rem}.teacher,.chip{padding:5px 8px}.top-actions,.brand{gap:6px}main{padding-top:12px}}
+@media(max-width:620px){.top-in,main{width:calc(100% - 22px)}.top-in{min-height:60px}.layout{grid-template-columns:1fr}.world{gap:12px;padding:13px}.track{gap:6px}.mission{padding:8px 4px;flex-direction:column;text-align:center;gap:5px}.mission-icon{width:33px;height:33px}.mission strong{font-size:.86rem}.mode-type{font-size:.65rem}.teacher,.chip{padding:5px 8px}.top-actions,.brand{gap:6px}main{padding-top:12px}}
 </style>
 </head>
 <body>
@@ -81,8 +80,8 @@ h2{font-size:clamp(1.45rem,3vw,2rem);line-height:1.09;margin-bottom:6px;letter-s
 <main>
   <div class="layout">
     <section class="world" aria-label="Expedition map">
-      <canvas id="landscape" width="240" height="270" aria-hidden="true"></canvas>
       <div><p class="eyebrow">Maths expedition</p><h1>Nik's BRICKS</h1><p class="world-copy" id="world-copy"></p></div>
+      <canvas id="landscape" width="384" height="224" aria-hidden="true"></canvas>
       <div class="world-foot"><span class="world-name" id="world-name"></span><span class="pack" role="img" id="pack"></span></div>
     </section>
     <section class="board" aria-label="Puzzle">
@@ -129,9 +128,9 @@ const byId = id => document.getElementById(id);
 const puzzle = byId('puzzle');
 const feedback = byId('feedback');
 const modes = {
-  bridge: { name:'Bridge Run', skill:'Multiples', copy:'Find the numbers that belong and build a bridge across the ravine.' },
-  mine: { name:'Crystal Mine', skill:'Factors', copy:'Split crystals into equal rows to find which numbers fit.' },
-  forge: { name:'Table Forge', skill:'Times tables', copy:'Use your times tables to power the forge.' }
+  bridge: { name:'Bridge Run', skill:'Multiples', copy:'Build a path across the ravine, one safe brick at a time.' },
+  mine: { name:'Crystal Mine', skill:'Factors', copy:'Solve the crystal puzzles to light a path through the mine.' },
+  forge: { name:'Table Forge', skill:'Times tables', copy:'Power the stepping platforms and climb above the lava.' }
 };
 const tables = {
   starter:[2,5,10],
@@ -163,6 +162,7 @@ let settingsFocus;
 const missions = Array.from(document.querySelectorAll('.mission'));
 const levelButtons = Array.from(document.querySelectorAll('[data-level]'));
 const tableSelect = byId('table');
+const expedition = makeExpedition(byId('landscape'),byId('world-name'));
 for(let n=1;n<=12;n++) tableSelect.add(new Option(n+' times table',n));
 
 function persist(){
@@ -247,7 +247,8 @@ function begin(newMode, moveFocus=false){
   finished = false;
   missions.forEach(button=>button.setAttribute('aria-pressed',button.dataset.mode===mode));
   byId('skill').textContent = modes[mode].skill;
-  byId('world-name').textContent = modes[mode].name;
+  const landingsPerPuzzle=mode==='bridge'&&!questions[0].kind?2:1;
+  expedition.reset(mode,questions.length*landingsPerPuzzle,index*landingsPerPuzzle);
   byId('world-copy').textContent = modes[mode].copy;
   showQuestion(moveFocus);
 }
@@ -258,12 +259,12 @@ function updateProgress(){
   byId('progress').textContent = finished ? 'Mission complete' : 'Puzzle '+(index+1)+' / '+roundSize;
   const earned = finished ? roundSize : index+Number(completed);
   byId('pack').setAttribute('aria-label',earned+' of '+roundSize+' mission crystals');
-  paintWorld(Math.floor(5*earned/roundSize));
   byId('pack').innerHTML = range(roundSize).map(i=>'<i aria-hidden="true" class="'+(i<=earned?'filled':'')+'"></i>').join('');
 }
 function say(message,kind=''){
   feedback.className = 'feedback '+kind;
   feedback.textContent = message;
+  if(kind==='bad') expedition.move('retry');
 }
 const advancedPrompts = {
   missingStone:q=>['Restore the missing stone','Both jumps are the same size. What number goes in the middle?',
@@ -372,6 +373,7 @@ function respondToChoice(button){
     if(bridgePlaced===2) win('Bridge built! Each stone is '+q.n+' more than the last.');
     else {
       button.disabled=true;
+      expedition.move('forward');
       say('That fits. Jump forward by '+q.n+' once more.','good');
     }
   } else {
@@ -444,6 +446,7 @@ function hint(){
 }
 function win(message){
   completed=true;
+  expedition.move('forward');
   if(!hinted&&!retried) independent++;
   total++;
   persist();
@@ -467,7 +470,8 @@ function advance(){
   finished=true;
   updateProgress();
   say('');
-  puzzle.innerHTML = '<div class="complete"><h2 id="finish" tabindex="-1">Mission complete!</h2><div class="model">+'+roundSize+' crystals</div><p>You solved '+independent+' of '+roundSize+' puzzles on your first try without hints.</p><button class="primary" id="again">Play again</button></div>';
+  const arrivals={bridge:'You crossed the ravine.',mine:'You reached the crystal chamber.',forge:'You climbed out of the lava chamber.'};
+  puzzle.innerHTML = '<div class="complete"><h2 id="finish" tabindex="-1">Mission complete!</h2><p>'+arrivals[mode]+'</p><div class="model">+'+roundSize+' crystals</div><p>You solved '+independent+' of '+roundSize+' puzzles on your first try without hints.</p><button class="primary" id="again">Play again</button></div>';
   byId('finish').focus();
 }
 puzzle.addEventListener('click',event=>{
@@ -533,65 +537,275 @@ settings.addEventListener('keydown',event=>{
 });
 settings.addEventListener('click',event=>{ if(event.target===settings) closeSettings(); });
 
-function paintWorld(earned){
-  const canvas=byId('landscape');
-  const context=canvas.getContext('2d');
-  if(!context) return;
-  const palettes={
-    bridge:['#302547','#50345c','#a95965','#ffb471','#67435e','#463355','#302441','#f9ae67','#8b5abb'],
-    mine:['#24203e','#382b5c','#5e448d','#da90cf','#594276','#423257','#2e2546','#d6a6ff','#8cf0d2'],
-    forge:['#32203d','#522d56','#aa5b66','#ffb26c','#73435a','#48304e','#2f213e','#ffd278','#ec7958']
+function makeExpedition(canvas, meter){
+  const context = canvas.getContext('2d');
+  const backdrop = document.createElement('canvas');
+  backdrop.width = canvas.width;
+  backdrop.height = canvas.height;
+  const background = backdrop.getContext('2d');
+  const {width,height} = canvas;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const colours = {
+    bridge:{shadow:'#332636',side:'#925549',top:'#ffcb82',active:'#fff0ad',dim:'#7c5b74',spark:'#ffed9a'},
+    mine:{shadow:'#222740',side:'#395e7c',top:'#77dce7',active:'#bbffdf',dim:'#4a6585',spark:'#9df4fb'},
+    forge:{shadow:'#382431',side:'#884448',top:'#ff9c54',active:'#ffe29a',dim:'#845470',spark:'#ffe191'}
   };
-  const [top,sky,horizon,sun,far,near,rock,light,crystal]=palettes[mode];
-  const rect=(x,y,w,h,colour)=>{ context.fillStyle=colour; context.fillRect(x,y,w,h); };
-  let seed=93;
-  const rand=()=>{ seed=(Math.imul(seed,1664525)+1013904223)>>>0; return seed/4294967296; };
-  rect(0,0,240,270,top);
-  rect(0,74,240,96,sky);
-  rect(0,112,240,66,horizon);
-  for(let i=0;i<67;i++) rect(Math.floor(rand()*240),Math.floor(rand()*150),rand()>.82?2:1,1,i%4?sky:light);
-  // A stepped sun and two ridgelines give the map an original pixel-art silhouette.
-  for(let i=0;i<5;i++) rect(155-i*4,94+i*5,31+i*8,42-i*3,sun);
-  rect(133,130,74,4,horizon);
-  rect(136,141,70,3,horizon);
-  for(const [position,shade] of [[144,far],[177,near]]){
-    let y=position;
-    for(let x=0;x<240;x+=8){
-      y=Math.max(position-20,Math.min(position+23,y+(Math.floor(rand()*3)-1)*7));
-      rect(x,y,8,270-y,shade);
-    }
+  const labels = {bridge:'Bridge',mine:'Mine',forge:'Forge'};
+  let world = 'bridge', count = 1, landed = 0, frame = 0, motion = null;
+  const queue = [];
+  const rect = (ctx,x,y,w,h,colour)=>{
+    ctx.fillStyle=colour;
+    ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));
+  };
+  const fg = (x,y,w,h,colour)=>rect(context,x,y,w,h,colour);
+  const bg = (x,y,w,h,colour)=>rect(background,x,y,w,h,colour);
+
+  function position(i){
+    const t = i/count;
+    const rise = world==='bridge' ? 12*Math.sin(Math.PI*t) :
+      world==='mine' ? 20*t+12*Math.sin(Math.PI*t) : 29*t-7*Math.sin(2*Math.PI*t);
+    return {x:39+306*t,y:145-rise};
   }
-  function pillar(x,y,w){
-    rect(x,y,w,270-y,rock);
-    rect(x,y,w,4,light);
-    rect(x,y+4,w,5,far);
-    for(let j=y+12;j<270;j+=8){
-      for(let i=x;i<x+w;i+=8){
-        const shade=rand();
-        if(shade>.52) rect(i,j,Math.min(7,x+w-i),5,shade>.83?far:near);
-        if(shade>.93) rect(i+1,j+1,3,1,light);
+  function seededRandom(){
+    let seed = 207;
+    return ()=>{
+      seed = (Math.imul(seed,1664525)+1013904223)>>>0;
+      return seed/4294967296;
+    };
+  }
+  function drawBackdrop(){
+    const rand=seededRandom();
+    if(world==='bridge'){
+      bg(0,0,width,height,'#503c64');
+      bg(0,22,width,116,'#825e87');
+      bg(0,47,width,99,'#ba7d91');
+      bg(0,73,width,115,'#eaa48d');
+      bg(0,98,width,98,'#f6bb8d');
+      for(let i=0;i<6;i++) bg(256-i*4,29+i*4,32+i*8,38-i*3,'#ffdf9a');
+      for(const [x,y,w] of [[31,37,68],[96,68,48],[302,67,53],[153,32,37]]){
+        bg(x,y,w,3,'#fcb9ac');bg(x+11,y-4,w-20,4,'#ffd4ac');
+      }
+      for(const [base,colour] of [[111,'#a57691'],[144,'#826584'],[169,'#5c506c']]){
+        let y=base;
+        for(let x=0;x<width;x+=8){
+          y=Math.max(base-20,Math.min(base+19,y+(Math.floor(rand()*3)-1)*6));
+          bg(x,y,8,height-y,colour);
+        }
+      }
+      bg(0,196,width,28,'#626884');
+      bg(0,203,width,21,'#4c5c7b');
+      for(let i=0;i<26;i++) bg(rand()*width,198+rand()*26,7+rand()*23,1,i%2?'#74819c':'#3c4d6d');
+      for(const [x,y,s] of [[10,145,1],[25,144,.8],[366,145,1.15],[377,147,.7]]){
+        bg(x,y-32*s,4*s,32*s,'#5e3951');
+        for(let j=0;j<3;j++) bg(x-(4+j*3)*s,y-(47-j*9)*s,(12+j*6)*s,10*s,j%2?'#548c80':'#6ba487');
+      }
+    } else if(world==='mine'){
+      bg(0,0,width,height,'#20213c');
+      bg(0,51,width,135,'#303052');
+      bg(0,95,width,129,'#3b3861');
+      for(let x=0;x<width;x+=12){
+        const drip=9+rand()*39;
+        bg(x,0,12,drip,'#242441');bg(x+2,0,8,drip-6,'#191c35');
+        const bank=173+rand()*42;
+        bg(x,bank,12,height-bank,'#313252');
+      }
+      for(let i=0;i<85;i++){
+        const x=rand()*width,y=13+rand()*205;
+        bg(x,y,3+rand()*12,3,i%3?'#454164':'#655784');
+      }
+      for(const [x,y,s] of [[20,188,1],[105,199,.7],[151,218,1.05],[219,181,.9],[275,212,1.25],[367,199,.8]]){
+        drawCrystal(bg,x,y,s);
+      }
+    } else {
+      bg(0,0,width,height,'#362840');
+      bg(0,42,width,161,'#594057');
+      bg(0,166,width,58,'#8a4852');
+      for(let y=12;y<177;y+=12){
+        for(let x=-10;x<width;x+=23) bg(x+(y%24),y,20,9,rand()>.6?'#60465b':'#4e394e');
+      }
+      for(const x of [78,172,282]){
+        bg(x,0,11,183,'#3e3045');bg(x+2,0,3,183,'#7e5562');
+        bg(x-8,51,26,10,'#95635f');bg(x-8,59,26,4,'#5e3d4e');
+        bg(x+3,54,3,3,'#ffb675');
+      }
+      for(const x of [38,126,252,351]){
+        bg(x,28,15,27,'#403344');bg(x+3,31,9,17,'#c06855');bg(x+5,32,5,14,'#f8a665');
+      }
+      bg(0,192,width,32,'#ae424e');bg(0,197,width,27,'#db5950');bg(0,205,width,19,'#a63b4b');
+      for(let i=0;i<40;i++) bg(rand()*width,194+rand()*27,6+rand()*20,2,i%3?'#f88b54':'#ffbc62');
+    }
+    for(const i of [0,count]){
+      const {y}=position(i);
+      const start=i===0;
+      const left=start?0:width-46;
+      const edge=start?46:width;
+      for(let x=left;x<edge;x+=9){
+        const top=y+(start&&x<26?Math.round(rand()*3):0);
+        bg(x,top,9,height-top,colours[world].shadow);
+        bg(x,top,9,4,world==='bridge'?'#9bd195':colours[world].top);
+        bg(x,top+4,9,4,world==='bridge'?'#567a67':colours[world].side);
+        for(let row=top+12;row<height;row+=10){
+          bg(x,row,7,6,rand()>.48?colours[world].side:colours[world].dim);
+          bg(x,row+5,7,2,colours[world].shadow);
+        }
       }
     }
   }
-  pillar(0,173,36);pillar(32,192,37);pillar(68,214,27);pillar(153,210,27);pillar(177,191,22);pillar(198,170,42);
-  if(mode==='bridge'){
-    for(let i=0;i<3+earned;i++){
-      const x=63+15*i,y=189+Math.floor(12*Math.sin(i*Math.PI/7));
-      rect(x,y,13,8,rock);rect(x,y,13,3,light);rect(x+8,y+5,5,5,near);
-    }
-  } else {
-    rect(88,239,74,14,far);rect(93,238,64,3,light);
-    for(let i=0;i<earned;i++){
-      const x=95+13*i;
-      rect(x,227,7,10,crystal);rect(x+2,224,3,4,crystal);rect(x+4,228,2,5,light);
+  function drawCrystal(pixel,x,y,s){
+    pixel(x-7*s,y-11*s,14*s,11*s,'#3c578d');
+    pixel(x-5*s,y-19*s,10*s,16*s,'#77bdf3');
+    pixel(x-2*s,y-23*s,4*s,4*s,'#b1edff');
+    pixel(x+1*s,y-17*s,4*s,11*s,'#c2fff2');
+    pixel(x-10*s,y-7*s,7*s,7*s,'#806cc7');
+  }
+  function drawGoal(open){
+    const {x,y}=position(count);
+    if(world==='bridge'){
+      fg(x+14,y-45,3,45,'#523953');
+      fg(x+13,y-47,5,4,'#ffe9a8');
+      fg(x+17,y-43,17,6,open?'#ffdf83':'#b473a3');
+      fg(x+17,y-37,12,5,open?'#e99d57':'#884e84');
+    } else if(world==='mine'){
+      fg(x+4,y-32,29,32,'#21314f');fg(x+8,y-29,21,29,'#334769');
+      drawCrystal(fg,x+20,y-2,open?1.2:1);
+      if(open) fg(x+27,y-34,3,3,'#fff5b1');
+    } else {
+      fg(x+4,y-30,30,30,'#553b45');fg(x+8,y-25,22,25,'#283041');
+      fg(x+12,y-19,14,14,open?'#ffca71':'#814953');
+      fg(x+16,y-17,7,9,open?'#fff1a1':'#a35f5a');
     }
   }
-  for(const [x,y,scale] of [[27,172,2],[200,169,2],[114,230,2],[150,213,1],[178,190,1]]){
-    rect(x-3*scale,y-7*scale,6*scale,7*scale,crystal);
-    rect(x-scale,y-10*scale,2*scale,5*scale,crystal);
-    rect(x+scale,y-5*scale,2*scale,5*scale,light);
+  function drawTile(i,status){
+    const p=colours[world];
+    const {x,y}=position(i);
+    const wide=Math.min(37,Math.floor(306/count)-3);
+    const left=x-wide/2;
+    const dark=status==='dim';
+    if(dark){
+      fg(left+1,y,wide-2,2,p.dim);
+      fg(left+3,y+4,3,4,p.dim);
+      fg(left+wide-6,y+4,3,4,p.dim);
+      return;
+    }
+    fg(left-1,y-1,wide+2,10,p.shadow);
+    fg(left,y,wide,9,p.side);
+    fg(left,y,wide,3,status==='next'?p.active:p.top);
+    fg(left+3,y+4,wide-6,1,p.top);
+    if(world==='bridge') fg(x-1,y+5,2,4,p.shadow);
+    if(world==='mine'){
+      fg(left+4,y+5,3,3,p.active);fg(left+wide-7,y+5,3,3,p.active);
+    }
+    if(world==='forge') fg(left+4,y+5,wide-8,3,p.active);
   }
-  rect(205,148,3,22,rock);rect(208,149,15,10,crystal);rect(218,157,6,2,light);
+  function drawBoy(x,y,jump,backward){
+    context.save();
+    context.translate(Math.round(x),Math.round(y-jump));
+    if(backward) context.scale(-1,1);
+    // Pixel cells share one scale so head, outfit and boots stay on the same grid.
+    const px=(a,b,w,h,c)=>fg(a*3,b*3,w*3,h*3,c);
+    const outline='#252438',hair='#30223a',skin='#f0b17f';
+    px(-4,-10,8,5,outline);px(-3,-9,6,4,'#237f82');
+    px(-3,-9,2,3,'#b66d45');px(-3,-8,1,2,'#f6b66d');
+    px(3,-8,2,3,'#399d95');px(4,-6,1,1,skin);
+    px(-3,-5,6,3,'#293556');px(-3,-2,2,1,'#456283');px(1,-2,2,1,'#4e6a8c');
+    px(-4,-1,3,1,outline);px(1,-1,3,1,outline);
+    px(-4,-16,8,7,outline);px(-3,-15,7,5,skin);px(-3,-11,6,1,'#d88e6c');
+    px(-4,-16,8,2,hair);px(-4,-14,2,3,hair);
+    px(-1,-16,4,1,'#573647');px(2,-14,2,1,hair);
+    px(2,-13,1,1,'#493747');px(3,-12,1,1,'#ffe0b6');
+    context.restore();
+  }
+  function drawDebris(i,t){
+    const p=colours[world], {x,y}=position(i);
+    if(t<.27){
+      drawTile(i,'next');
+      fg(x,y,2,3,p.shadow);fg(x-3,y+3,4,2,p.shadow);fg(x-3,y+5,2,4,p.shadow);
+    } else {
+      const drop=(t-.27)/.73;
+      for(let n=0;n<6;n++){
+        const dx=(n-2.5)*3*(1+drop*2);
+        fg(x+dx,y+66*drop*drop+(n%3)*3,3+n%2,3,n%2?p.side:p.top);
+      }
+    }
+  }
+  function draw(t=0){
+    context.drawImage(backdrop,0,0);
+    let x=position(landed).x,y=position(landed).y,jump=0,backward=false;
+    for(let i=1;i<count;i++){
+      if(motion?.kind==='retry'&&i===landed+1) continue;
+      drawTile(i,i<=landed?'safe':i===landed+1?'next':'dim');
+    }
+    if(motion){
+      const from=position(landed), to=position(landed+1);
+      const retreat=motion.kind==='retry';
+      const move=retreat?(t<.35?t/.35*.8:(1-t)/.65*.8):t;
+      x=from.x+(to.x-from.x)*move;
+      y=from.y+(to.y-from.y)*move;
+      jump=Math.sin(Math.PI*t)*(retreat?19:24);
+      backward=retreat&&t>=.35;
+      if(retreat) drawDebris(landed+1,t);
+      else for(let i=0;i<4;i++) fg(to.x+(i-1.5)*8*t,to.y-9-i*4-11*t,2+i%2,2,colours[world].spark);
+    }
+    drawGoal(landed===count);
+    if(motion?.kind==='retry'&&landed+1===count) drawDebris(count,t);
+    const ground=position(landed).y;
+    fg(x-9,ground+2,19,2,'#392e46');
+    drawBoy(x,y,jump,backward);
+    if(landed===count){
+      for(let i=0;i<13;i++) fg(326+(i*17)%51,55+(i*11)%47,2+i%3,3,colours[world].spark);
+    }
+  }
+  function updateMeter(){
+    meter.textContent=landed===count
+      ? 'Safe on the other side!'
+      : labels[world]+' · '+landed+' / '+count+' landings';
+  }
+  function run(){
+    if(motion||!queue.length) return;
+    motion={kind:queue.shift(),start:null};
+    if(reducedMotion.matches){
+      if(motion.kind==='forward') landed++;
+      motion=null;
+      draw();
+      updateMeter();
+      run();
+      return;
+    }
+    frame=requestAnimationFrame(tick);
+  }
+  function tick(now){
+    if(motion.start===null) motion.start=now;
+    const amount=(now-motion.start)/(motion.kind==='forward'?370:590);
+    if(amount<1){
+      draw(amount);
+      frame=requestAnimationFrame(tick);
+      return;
+    }
+    if(motion.kind==='forward') landed++;
+    motion=null;
+    frame=0;
+    draw();
+    updateMeter();
+    run();
+  }
+  return {
+    reset(name,steps,start){
+      cancelAnimationFrame(frame);
+      queue.length=0;
+      motion=null;
+      world=name;
+      count=steps;
+      landed=start;
+      drawBackdrop();
+      draw();
+      updateMeter();
+    },
+    move(kind){
+      if(kind==='retry'&&(queue.at(-1)==='retry'||(!queue.length&&motion?.kind==='retry'))) return;
+      queue.push(kind);
+      run();
+    }
+  };
 }
 if(dev){
   byId('total-gems').hidden=true;
