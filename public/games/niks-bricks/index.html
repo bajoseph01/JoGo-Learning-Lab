@@ -144,6 +144,12 @@ h2{font-size:clamp(1.45rem,3vw,2rem);line-height:1.09;margin-bottom:6px;letter-s
   <div class="shop-list" id="shop-items"></div>
   <p class="shop-feedback" id="shop-feedback" role="status"></p>
 </dialog>
+<dialog class="shop-dialog" id="starter-setup" aria-labelledby="starter-title">
+  <h2 id="starter-title">Set up a starter balance</h2>
+  <p>Set the spendable balance on this device to 25 crystals. Any gear already bought stays yours.</p>
+  <div class="controls"><button class="primary" id="apply-starter" type="button">Set to 25 crystals</button><button class="secondary" id="cancel-starter" type="button" autofocus>Cancel</button></div>
+  <p id="starter-message" role="status"></p>
+</dialog>
 <script>
 'use strict';
 const byId = id => document.getElementById(id);
@@ -183,10 +189,10 @@ const gear = {
 };
 function readWallet(value){
   const total = Number.isSafeInteger(value.total)&&value.total>=0 ? value.total : 0;
-  const balance = Number.isSafeInteger(value.balance)&&value.balance>=0&&value.balance<=total ? value.balance : total;
+  const balance = Number.isSafeInteger(value.balance)&&value.balance>=0 ? value.balance : total;
   const owned = Object.keys(gear).filter(id=>Array.isArray(value.owned)&&value.owned.includes(id));
   const equipped = owned.filter(id=>Array.isArray(value.equipped)&&value.equipped.includes(id));
-  return {total,balance,owned,equipped};
+  return {total,balance,owned,equipped,starterApplied:value.starterApplied===true};
 }
 let wallet = readWallet(saved);
 let mode = 'bridge';
@@ -200,8 +206,11 @@ const expedition = makeExpedition(byId('landscape'),byId('world-name'));
 for(let n=1;n<=12;n++) tableSelect.add(new Option(n+' times table',n));
 
 function persist(){
-  if(dev) return;
-  try { localStorage.setItem(key,JSON.stringify({level,table:focusTable,...wallet})); } catch {}
+  if(dev) return false;
+  try {
+    localStorage.setItem(key,JSON.stringify({level,table:focusTable,...wallet}));
+    return true;
+  } catch { return false; }
 }
 function refreshWallet(){
   if(dev) return;
@@ -936,6 +945,35 @@ if(dev){
   if(Object.hasOwn(modes,params.get('mission'))) mode=params.get('mission');
 }
 begin(mode);
+if(!dev&&params.get('starter-crystals')==='1'){
+  const setup=byId('starter-setup');
+  const clearLink=()=>{
+    const url=new URL(location.href);
+    url.searchParams.delete('starter-crystals');
+    history.replaceState(null,'',url);
+  };
+  setup.addEventListener('close',clearLink);
+  byId('cancel-starter').addEventListener('click',()=>setup.close());
+  byId('apply-starter').addEventListener('click',()=>{
+    refreshWallet();
+    if(wallet.starterApplied){
+      updateBalance();
+      setup.close();
+      return;
+    }
+    const previous=wallet;
+    wallet={...wallet,balance:25,starterApplied:true};
+    if(!persist()){
+      wallet=previous;
+      byId('starter-message').textContent='Could not save on this device. Open the game in a regular Safari tab and try again.';
+      return;
+    }
+    updateBalance();
+    setup.close();
+  });
+  if(wallet.starterApplied) clearLink();
+  else setup.showModal();
+}
 </script>
 </body>
 </html>
