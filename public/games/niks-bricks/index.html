@@ -20,6 +20,22 @@ button:focus-visible,select:focus-visible,input:focus-visible,[tabindex="-1"]:fo
 .gem{width:15px;height:15px}
 .chip,.teacher{min-height:44px;padding:7px 12px;border:1px solid #6f5b89;border-radius:9px;background:#332646;color:#fff6e3;font-weight:750}
 .teacher{background:transparent}
+.shop-button{cursor:pointer;gap:6px}
+.shop-button .gem{background:#ffbd75}
+.shop-dialog{color:var(--ink);border:2px solid #40285e;background:var(--cream);border-radius:14px;padding:19px;width:min(480px,calc(100% - 24px));max-height:calc(100% - 32px);box-shadow:0 5px #39254f}
+.shop-dialog::backdrop{background:#201936bb}
+.shop-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.shop-head h2{margin-bottom:0}
+.shop-balance{font-weight:850;color:#633c93;margin:10px 0 0}
+.shop-list{display:grid;gap:8px;margin:12px 0}
+.shop-item{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:9px;align-items:center;padding:8px;border:1px solid #ded3e6;border-radius:8px}
+.shop-swatch{width:34px;height:34px;display:grid;place-items:center;background:#e9deef;border-radius:5px;font-size:20px;font-weight:900}
+.swatch-helmet{color:#24768e}.swatch-cape{color:#852746}.swatch-trail{color:#87510e}
+.shop-item strong,.shop-item small{display:block}
+.shop-item small{font-size:.84rem;color:#574764;line-height:1.25}
+.shop-item button{min-height:44px;padding:6px 9px;white-space:nowrap}
+.shop-item button:disabled{background:#ded3e6;color:#49375c;opacity:1;box-shadow:none}
+.shop-feedback{min-height:1.3em;margin:0;color:#55338b;font-weight:750}
 main{padding:24px 0 32px}.layout{display:grid;grid-template-columns:minmax(290px,.85fr) minmax(390px,1.15fr);gap:19px;align-items:stretch}
 .world{overflow:hidden;background:#26203e;color:#fff7e7;min-width:0;border:3px solid #201936;border-radius:16px;display:flex;flex-direction:column;justify-content:center;gap:17px;padding:19px}
 #landscape{display:block;width:100%;height:auto;aspect-ratio:384/224;background:#3a2c51;image-rendering:pixelated;border:2px solid #625174;border-radius:8px}
@@ -75,7 +91,7 @@ h2{font-size:clamp(1.45rem,3vw,2rem);line-height:1.09;margin-bottom:6px;letter-s
 <body>
 <header class="top"><div class="top-in">
   <div class="brand"><span class="logo" aria-hidden="true"></span>Nik's BRICKS</div>
-  <div class="top-actions"><span class="chip" role="img" id="total-gems" aria-label="0 total crystals"><span class="gem" aria-hidden="true"></span><span id="total">0</span></span><button class="teacher" id="teacher" type="button">Teacher</button></div>
+  <div class="top-actions"><button class="chip shop-button" id="total-gems" type="button" aria-haspopup="dialog"><span class="gem" aria-hidden="true"></span><span id="total">0</span><span>Shop</span></button><button class="teacher" id="teacher" type="button">Teacher</button></div>
 </div></header>
 <main>
   <div class="layout">
@@ -122,6 +138,12 @@ h2{font-size:clamp(1.45rem,3vw,2rem);line-height:1.09;margin-bottom:6px;letter-s
     <div class="controls"><button class="primary" id="apply">Done</button><button class="secondary" id="cancel">Cancel</button></div>
   </section>
 </div>
+<dialog class="shop-dialog" id="crystal-shop" aria-labelledby="shop-title">
+  <div class="shop-head"><h2 id="shop-title">Crystal Shop</h2><button class="secondary" id="shop-close" type="button">Done</button></div>
+  <p class="shop-balance">Crystals to spend · <span id="shop-balance"></span></p>
+  <div class="shop-list" id="shop-items"></div>
+  <p class="shop-feedback" id="shop-feedback" role="status"></p>
+</dialog>
 <script>
 'use strict';
 const byId = id => document.getElementById(id);
@@ -154,7 +176,19 @@ try { if(!dev) saved = JSON.parse(localStorage.getItem(key)) || {}; } catch {}
 if(dev && Object.hasOwn(tables,params.get('level'))) saved.level = params.get('level');
 let level = Object.hasOwn(tables,saved.level) ? saved.level : 'starter';
 let focusTable = Number.isInteger(saved.table) && saved.table >= 1 && saved.table <= 12 ? saved.table : 0;
-let total = Number.isSafeInteger(saved.total) && saved.total >= 0 ? saved.total : 0;
+const gear = {
+  helmet:{name:'Crystal Helmet', price:25, icon:'▣', description:'A turquoise helmet for your explorer.'},
+  cape:{name:'Ruby Cape', price:45, icon:'▰', description:'A red cape that flutters when you jump.'},
+  trail:{name:'Golden Trail', price:55, icon:'✦', description:'Gold sparks follow each jump.'}
+};
+function readWallet(value){
+  const total = Number.isSafeInteger(value.total)&&value.total>=0 ? value.total : 0;
+  const balance = Number.isSafeInteger(value.balance)&&value.balance>=0&&value.balance<=total ? value.balance : total;
+  const owned = Object.keys(gear).filter(id=>Array.isArray(value.owned)&&value.owned.includes(id));
+  const equipped = owned.filter(id=>Array.isArray(value.equipped)&&value.equipped.includes(id));
+  return {total,balance,owned,equipped};
+}
+let wallet = readWallet(saved);
 let mode = 'bridge';
 let questions = [], index = 0, selection = [], lastTest = 0, bridgePlaced = 0;
 let completed = false, hinted = false, retried = false, finished = false, independent = 0;
@@ -167,7 +201,14 @@ for(let n=1;n<=12;n++) tableSelect.add(new Option(n+' times table',n));
 
 function persist(){
   if(dev) return;
-  try { localStorage.setItem(key,JSON.stringify({level,table:focusTable,total})); } catch {}
+  try { localStorage.setItem(key,JSON.stringify({level,table:focusTable,...wallet})); } catch {}
+}
+function refreshWallet(){
+  if(dev) return;
+  try {
+    const record=localStorage.getItem(key);
+    if(record) wallet=readWallet(JSON.parse(record));
+  } catch {}
 }
 function shuffle(items){
   const result = items.slice();
@@ -254,8 +295,7 @@ function begin(newMode, moveFocus=false){
 }
 function updateProgress(){
   const roundSize=questions.length;
-  byId('total').textContent = total;
-  byId('total-gems').setAttribute('aria-label',total+' total crystals');
+  updateBalance();
   byId('progress').textContent = finished ? 'Mission complete' : 'Puzzle '+(index+1)+' / '+roundSize;
   const earned = finished ? roundSize : index+Number(completed);
   byId('pack').setAttribute('aria-label',earned+' of '+roundSize+' mission crystals');
@@ -448,7 +488,9 @@ function win(message){
   completed=true;
   expedition.move('forward');
   if(!hinted&&!retried) independent++;
-  total++;
+  refreshWallet();
+  wallet.total++;
+  wallet.balance++;
   persist();
   updateProgress();
   puzzle.querySelectorAll('.choice,.key,#answer').forEach(control=>control.disabled=true);
@@ -502,6 +544,7 @@ missions.forEach(button=>button.addEventListener('click',()=>{
 levelButtons.forEach(button=>button.addEventListener('click',()=>{
   if(button.dataset.level===level) return;
   level=button.dataset.level;
+  refreshWallet();
   persist();
   begin(mode,true);
 }));
@@ -510,6 +553,8 @@ byId('teacher').addEventListener('click',()=>{
   settingsFocus=document.activeElement;
   byId('level').value=level;
   tableSelect.value=focusTable;
+  refreshWallet();
+  const {total}=wallet;
   byId('teacher-total').textContent=total+' '+(total===1?'crystal':'crystals');
   settings.hidden=false;
   byId('level').focus();
@@ -522,6 +567,7 @@ byId('apply').addEventListener('click',()=>{
   const tableChanged=newTable!==focusTable;
   level=newLevel;
   focusTable=newTable;
+  refreshWallet();
   persist();
   closeSettings();
   if(changed) begin(tableChanged&&newTable?'forge':mode,true);
@@ -536,6 +582,65 @@ settings.addEventListener('keydown',event=>{
   }
 });
 settings.addEventListener('click',event=>{ if(event.target===settings) closeSettings(); });
+
+function updateBalance(){
+  byId('total').textContent=wallet.balance;
+  byId('total-gems').setAttribute('aria-label','Crystal Shop, '+wallet.balance+' crystals to spend');
+}
+const shop=byId('crystal-shop');
+const shopList=byId('shop-items');
+const shopFeedback=byId('shop-feedback');
+function showGear(focusId){
+  byId('shop-balance').textContent=wallet.balance;
+  shopList.innerHTML=Object.entries(gear).map(([id,item])=>{
+    const owned=wallet.owned.includes(id), wearing=wallet.equipped.includes(id);
+    const label=owned?(wearing?'Remove':'Equip'):'Buy · '+item.price;
+    const detail=owned?(wearing?'Equipped':'Owned'):item.price+' crystals';
+    return '<div class="shop-item"><span class="shop-swatch swatch-'+id+'" aria-hidden="true">'+item.icon+'</span>'+
+      '<div><strong>'+item.name+'</strong><small>'+item.description+'</small><small>'+detail+'</small></div>'+
+      '<button type="button" class="secondary" data-gear="'+id+'" aria-label="'+label+' '+item.name+'"'+
+      (!owned&&wallet.balance<item.price?' disabled':'')+'>'+label+'</button></div>';
+  }).join('');
+  if(focusId) (shopList.querySelector('[data-gear="'+focusId+'"]:enabled')||byId('shop-close')).focus();
+}
+byId('total-gems').addEventListener('click',()=>{
+  refreshWallet();
+  updateBalance();
+  shopFeedback.textContent='';
+  showGear();
+  shop.showModal();
+});
+byId('shop-close').addEventListener('click',()=>shop.close());
+shop.addEventListener('close',()=>byId('total-gems').focus());
+shopList.addEventListener('click',event=>{
+  const id=event.target.closest('[data-gear]')?.dataset.gear;
+  if(!Object.hasOwn(gear,id)) return;
+  refreshWallet();
+  const item=gear[id];
+  if(wallet.owned.includes(id)){
+    const wearing=wallet.equipped.includes(id);
+    wallet.equipped=wearing?wallet.equipped.filter(e=>e!==id):[...wallet.equipped,id];
+    shopFeedback.textContent=item.name+(wearing?' removed.':' equipped.');
+  } else if(wallet.balance>=item.price){
+    wallet.balance-=item.price;
+    wallet.owned.push(id);
+    wallet.equipped.push(id);
+    shopFeedback.textContent=item.name+' bought and equipped!';
+  } else {
+    shopFeedback.textContent='Keep playing to earn more crystals.';
+  }
+  persist();
+  updateBalance();
+  showGear(id);
+  expedition.refresh();
+});
+window.addEventListener('storage',event=>{
+  if(dev||event.key!==key) return;
+  refreshWallet();
+  updateBalance();
+  if(shop.open) showGear(document.activeElement?.dataset.gear);
+  expedition.refresh();
+});
 
 function makeExpedition(canvas, meter){
   const context = canvas.getContext('2d');
@@ -704,6 +809,11 @@ function makeExpedition(canvas, meter){
     // Pixel cells share one scale so head, outfit and boots stay on the same grid.
     const px=(a,b,w,h,c)=>fg(a*3,b*3,w*3,h*3,c);
     const outline='#252438',hair='#30223a',skin='#f0b17f';
+    if(wallet.equipped.includes('cape')){
+      const hem=jump>4?-5:-3;
+      px(-7,-8,5,3,'#542644');px(-7,-7,4,2,'#b6385c');
+      px(-7,hem,4,2,'#d94e69');px(-6,hem+1,2,1,'#f18f86');
+    }
     px(-4,-10,8,5,outline);px(-3,-9,6,4,'#237f82');
     px(-3,-9,2,3,'#b66d45');px(-3,-8,1,2,'#f6b66d');
     px(3,-8,2,3,'#399d95');px(4,-6,1,1,skin);
@@ -713,6 +823,10 @@ function makeExpedition(canvas, meter){
     px(-4,-16,8,2,hair);px(-4,-14,2,3,hair);
     px(-1,-16,4,1,'#573647');px(2,-14,2,1,hair);
     px(2,-13,1,1,'#493747');px(3,-12,1,1,'#ffe0b6');
+    if(wallet.equipped.includes('helmet')){
+      px(-5,-17,10,3,'#2e527b');px(-4,-18,8,3,'#469dc0');
+      px(-3,-18,6,1,'#a7ffe4');px(3,-16,2,2,'#65d9dc');px(-5,-15,2,2,'#3a88ad');
+    }
     context.restore();
   }
   function drawDebris(i,t){
@@ -750,6 +864,14 @@ function makeExpedition(canvas, meter){
     if(motion?.kind==='retry'&&landed+1===count) drawDebris(count,t);
     const ground=position(landed).y;
     fg(x-9,ground+2,19,2,'#392e46');
+    if(wallet.equipped.includes('trail')){
+      const direction=backward?1:-1;
+      for(let i=0;i<5;i++){
+        const trailX=x+direction*(16+i*5);
+        const trailY=y-jump-4-i%3*5+(motion?Math.sin(t*Math.PI)*6:0);
+        fg(trailX,trailY,3+i%2,3,i%2?'#f6aa51':'#fff1a1');
+      }
+    }
     drawBoy(x,y,jump,backward);
     if(landed===count){
       for(let i=0;i<13;i++) fg(326+(i*17)%51,55+(i*11)%47,2+i%3,3,colours[world].spark);
@@ -789,6 +911,7 @@ function makeExpedition(canvas, meter){
     run();
   }
   return {
+    refresh(){ if(!motion) draw(); },
     reset(name,steps,start){
       cancelAnimationFrame(frame);
       queue.length=0;
